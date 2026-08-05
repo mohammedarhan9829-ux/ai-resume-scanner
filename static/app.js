@@ -5,7 +5,7 @@
  * 2. Timed Live Mock Interview Test (10 Questions - 10 Min Limit) with AI Model Answer Comparison & Match %
  * 3. Placement Salary & Market Demand Intelligence
  * 4. ATS Health Compliance Audit (0-100 Score)
- * 5. Full Mobile Touch & Mobile Web Compatibility
+ * 5. Full Mobile Touch & Robust Server Build Error Handling
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -705,7 +705,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: formData
             });
 
-            const data = await response.json();
+            let data;
+            const contentType = response.headers.get("content-type") || "";
+            if (contentType.includes("application/json")) {
+                data = await response.json();
+            } else {
+                const textErr = await response.text();
+                if (response.status === 502 || response.status === 503 || textErr.includes("<!DOCTYPE")) {
+                    throw new Error("Server build is currently deploying on Render. Please wait 15 seconds for deployment to finish and click Scan again!");
+                }
+                throw new Error(`Server error status ${response.status}`);
+            }
+
             if (!response.ok || !data.success) {
                 if (response.status === 429) {
                     pricingModal.classList.remove("hidden");
