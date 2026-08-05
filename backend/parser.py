@@ -3,7 +3,7 @@ import re
 import os
 import logging
 from typing import Tuple, Dict, Any
-from PIL import Image, ImageEnhance, ImageFilter
+from PIL import Image, ImageEnhance
 
 # PDF Libraries
 try:
@@ -51,33 +51,27 @@ logger = logging.getLogger("ResumeParser")
 
 class ResumeParser:
     """
-    Parser for extracting text from PDF, JPG, JPEG, and PNG resume files.
-    Supports native PDF text reading and Tesseract OCR for image files.
+    Fast Parser for extracting text from PDF, JPG, JPEG, and PNG resume files.
+    Supports native PDF text reading and high-speed Tesseract OCR with 7s timeout safety.
     """
 
     @staticmethod
     def preprocess_image(image: Image.Image) -> Image.Image:
-        """Apply image processing to improve OCR quality for scanned resumes/images."""
+        """Apply fast image processing to improve OCR speed and prevent freezing."""
         if image.mode != "RGB":
             image = image.convert("RGB")
         image = image.convert("L")
         
-        # Resize image: downscale large smartphone camera photos (>2000px) to prevent OOM on mobile
+        # Downscale large image to max 1500px dimension for fast 1-second OCR
         width, height = image.size
-        if width > 2000 or height > 2000:
-            max_dim = max(width, height)
-            scale = 2000.0 / max_dim
-            image = image.resize((int(width * scale), int(height * scale)), Image.Resampling.LANCZOS)
-        elif width < 1200:
-            scale = 1.8
-            image = image.resize((int(width * scale), int(height * scale)), Image.Resampling.LANCZOS)
+        max_dim = max(width, height)
+        if max_dim > 1500:
+            scale = 1500.0 / max_dim
+            image = image.resize((int(width * scale), int(height * scale)), Image.Resampling.BILINEAR)
+        elif max_dim < 800:
+            scale = 1.5
+            image = image.resize((int(width * scale), int(height * scale)), Image.Resampling.BILINEAR)
 
-        # Enhance Contrast
-        enhancer = ImageEnhance.Contrast(image)
-        image = enhancer.enhance(2.0)
-        # Sharpness
-        enhancer = ImageEnhance.Sharpness(image)
-        image = enhancer.enhance(1.5)
         return image
 
     @classmethod
@@ -138,7 +132,7 @@ class ResumeParser:
     @classmethod
     def parse_image(cls, file_bytes: bytes) -> Tuple[str, bool]:
         """
-        Extract text from JPG/JPEG/PNG images using Tesseract OCR.
+        Extract text from JPG/JPEG/PNG images using Tesseract OCR with 7-second safety timeout.
         Returns (extracted_text, is_ocr_successful).
         """
         try:
@@ -147,20 +141,21 @@ class ResumeParser:
 
             if PYTESSERACT_AVAILABLE:
                 try:
-                    text = pytesseract.image_to_string(processed_img)
+                    # Run Tesseract with strict 7s timeout to prevent hanging on cloud servers
+                    text = pytesseract.image_to_string(processed_img, timeout=7)
                     if not text or len(text.strip()) < 15:
-                        text = pytesseract.image_to_string(image)
+                        text = pytesseract.image_to_string(image, timeout=5)
                     
                     if text and len(text.strip()) > 15:
                         logger.info("Successfully extracted text from image using Tesseract OCR")
                         return cls.clean_text(text), True
                 except Exception as tess_err:
-                    logger.warning(f"Tesseract execution error: {tess_err}")
+                    logger.warning(f"Tesseract execution error or timeout: {tess_err}")
 
-            return "Scanned Image Resume Detected.", False
+            return "Scanned Image Resume Uploaded.", False
         except Exception as e:
             logger.error(f"Image processing failed: {e}")
-            return "", False
+            return "Scanned Image Resume Uploaded.", False
 
     @classmethod
     def parse_file(cls, filename: str, file_bytes: bytes) -> Dict[str, Any]:
