@@ -42,25 +42,8 @@ SKILL_KNOWLEDGE_BASE = {
 }
 
 
-# Multi-Stream Benchmark Job Profiles with Feature 3: Placement Salary & Market Demand Analytics
+# Multi-Stream Benchmark Job Profiles (Tech & Engineering Default First)
 JOB_PROFILES = {
-    "Demo Specialist / Sales Representative": {
-        "title": "Demo Specialist / Sales Representative",
-        "domain": "Sales, Retail & Product Promotion",
-        "stream": "Sales & Business",
-        "fresher_salary": "₹4.0 LPA – ₹8.5 LPA",
-        "experienced_salary": "₹9.0 LPA – ₹18.0 LPA",
-        "hiring_companies": ["Samsung", "Apple", "Maple Leaf", "Reliance Retail", "Unilever", "Summit Peak"],
-        "market_demand": "📈 Rapidly Growing (Retail & Consumer Tech)",
-        "description": "Engages customers, delivers compelling live product demonstrations, drives retail sales, and manages promotional events and brand experiences.",
-        "full_text": "Demo Specialist Sales Representative Product Demonstration Customer Engagement Sales Techniques Product Knowledge Presentation Skills Retail Sales Customer Experience Event Planning Promotional Materials Merchandising Inventory Management Sales Promotion Customer Service Lead Generation Negotiation Sales Reporting Key Account Management Direct Sales",
-        "core_skills": ["Product Demonstration", "Customer Engagement", "Sales Techniques", "Product Knowledge", "Presentation Skills", "Communication"],
-        "preferred_skills": ["Event Planning", "Promotional Materials", "Logistics", "Marketing", "Retail Sales", "Sales Reporting", "Customer Service"],
-        "learning_resources": {
-            "Sales Analytics": "Master CRM software (Salesforce, HubSpot) and retail sales tracking analytics.",
-            "Digital Marketing": "Learn social media product promotion and digital lead generation techniques."
-        }
-    },
     "AI / Machine Learning Engineer": {
         "title": "AI / Machine Learning Engineer",
         "domain": "Artificial Intelligence & Data Science",
@@ -70,12 +53,28 @@ JOB_PROFILES = {
         "hiring_companies": ["Google", "Amazon", "Microsoft", "NVIDIA", "TCS AI Lab", "High-Growth AI Startups"],
         "market_demand": "🔥 Extremely High Demand (Hot Tech Role)",
         "description": "Designs, builds, and deploys machine learning and deep learning models for predictive automation and artificial intelligence applications.",
-        "full_text": "AI Machine Learning Engineer Artificial Intelligence Data Science Python Machine Learning Deep Learning TensorFlow PyTorch Scikit-Learn Pandas NumPy Git NLP Computer Vision Docker FastAPI SQL Transformers AWS MLOps Neural Networks Fine-tuning RAG LLM",
+        "full_text": "AI Machine Learning Engineer Artificial Intelligence Data Science Python Machine Learning Deep Learning TensorFlow PyTorch Scikit-Learn Pandas NumPy Git NLP Computer Vision Docker FastAPI SQL Transformers AWS MLOps Neural Networks Fine-tuning RAG LLM B.Tech BTech Computer Engineering",
         "core_skills": ["Python", "Machine Learning", "Deep Learning", "TensorFlow", "PyTorch", "Scikit-Learn", "Pandas", "NumPy", "Git"],
         "preferred_skills": ["NLP", "Computer Vision", "Docker", "FastAPI", "SQL", "Transformers", "AWS", "MLOps"],
         "learning_resources": {
             "Deep Learning": "Master PyTorch/TensorFlow & Neural Network architectures (CNN, RNN, Transformers).",
             "MLOps": "Learn Docker containerization and FastAPI model deployment."
+        }
+    },
+    "Full-Stack Web Developer": {
+        "title": "Full-Stack Web Developer",
+        "domain": "Software Development",
+        "stream": "Tech & Engineering",
+        "fresher_salary": "₹6.0 LPA – ₹16.0 LPA",
+        "experienced_salary": "₹16.0 LPA – ₹32.0 LPA",
+        "hiring_companies": ["Meta", "Uber", "Zoho", "Freshworks", "Infosys", "Wipro", "Product Startups"],
+        "market_demand": "🔥 High Global Demand",
+        "description": "Develops end-to-end web applications, handling front-end user experience and back-end server microservices.",
+        "full_text": "Full-Stack Web Developer Software Development JavaScript HTML CSS React Node.js Express REST API SQL Git TypeScript Next.js MongoDB FastAPI Docker Tailwind PostgreSQL Microservices Serverless Frontend Backend B.Tech BTech Computer Engineering",
+        "core_skills": ["JavaScript", "HTML", "CSS", "React", "Node.js", "Express", "REST API", "SQL", "Git"],
+        "preferred_skills": ["TypeScript", "Next.js", "MongoDB", "FastAPI", "Docker", "Tailwind", "PostgreSQL"],
+        "learning_resources": {
+            "React": "Master React state management, hooks, and modern UI components."
         }
     },
     "Data Scientist": {
@@ -87,7 +86,7 @@ JOB_PROFILES = {
         "hiring_companies": ["Walmart Labs", "Flipkart", "Fractal Analytics", "Mu Sigma", "Deloitte", "Accenture"],
         "market_demand": "🔥 High Demand",
         "description": "Analyzes complex datasets to extract actionable business insights, statistical models, and predictive algorithms.",
-        "full_text": "Data Scientist Artificial Intelligence Data Science Python SQL Statistics Machine Learning Pandas NumPy Matplotlib Seaborn Scikit-Learn R Tableau Power BI Spark BigQuery AB Testing Feature Engineering Data Analytics Predictive Modeling",
+        "full_text": "Data Scientist Artificial Intelligence Data Science Python SQL Statistics Machine Learning Pandas NumPy Matplotlib Seaborn Scikit-Learn R Tableau Power BI Spark BigQuery AB Testing Feature Engineering Data Analytics Predictive Modeling B.Tech BTech",
         "core_skills": ["Python", "SQL", "Statistics", "Machine Learning", "Pandas", "NumPy", "Matplotlib", "Seaborn", "Scikit-Learn"],
         "preferred_skills": ["R", "Tableau", "Power BI", "Spark", "BigQuery", "A/B Testing", "Feature Engineering"],
         "learning_resources": {
@@ -112,22 +111,6 @@ JOB_PROFILES = {
             "Advanced Excel": "Master Pivot tables, VLOOKUP/XLOOKUP, and dynamic charting."
         }
     },
-    "Full-Stack Web Developer": {
-        "title": "Full-Stack Web Developer",
-        "domain": "Software Development",
-        "stream": "Tech & Engineering",
-        "fresher_salary": "₹6.0 LPA – ₹16.0 LPA",
-        "experienced_salary": "₹16.0 LPA – ₹32.0 LPA",
-        "hiring_companies": ["Meta", "Uber", "Zoho", "Freshworks", "Infosys", "Wipro", "Product Startups"],
-        "market_demand": "🔥 High Global Demand",
-        "description": "Develops end-to-end web applications, handling front-end user experience and back-end server microservices.",
-        "full_text": "Full-Stack Web Developer Software Development JavaScript HTML CSS React Node.js Express REST API SQL Git TypeScript Next.js MongoDB FastAPI Docker Tailwind PostgreSQL Microservices Serverless Frontend Backend",
-        "core_skills": ["JavaScript", "HTML", "CSS", "React", "Node.js", "Express", "REST API", "SQL", "Git"],
-        "preferred_skills": ["TypeScript", "Next.js", "MongoDB", "FastAPI", "Docker", "Tailwind", "PostgreSQL"],
-        "learning_resources": {
-            "React": "Master React state management, hooks, and modern UI components."
-        }
-    },
     "Financial Analyst": {
         "title": "Financial Analyst",
         "domain": "Finance, Banking & Investments",
@@ -137,11 +120,28 @@ JOB_PROFILES = {
         "hiring_companies": ["Goldman Sachs", "J.P. Morgan", "Morgan Stanley", "HDFC Bank", "ICICI Securities"],
         "market_demand": "🎯 High Value Finance Role",
         "description": "Evaluates financial data, builds financial models, prepares valuation reports, and guides corporate investment decisions.",
-        "full_text": "Financial Analyst Corporate Finance Financial Modeling Valuation Accounting Excel Financial Reporting Tally SAP SQL Power BI Statistics Risk Analysis Taxation Financial Statement Balance Sheet Cash Flow",
+        "full_text": "Financial Analyst Corporate Finance Financial Modeling Valuation Accounting Excel Financial Reporting Tally SAP SQL Power BI Statistics Risk Analysis Taxation Financial Statement Balance Sheet Cash Flow B.Com MBA Finance",
         "core_skills": ["Financial Analysis", "Financial Modeling", "Excel", "Accounting", "Valuation", "Corporate Finance", "Financial Reporting"],
         "preferred_skills": ["Tally", "SAP", "SQL", "Power BI", "Statistics", "Risk Analysis", "Taxation"],
         "learning_resources": {
             "Financial Modeling": "Practice 3-statement financial modeling and discounted cash flow (DCF) valuation."
+        }
+    },
+    "Demo Specialist / Sales Representative": {
+        "title": "Demo Specialist / Sales Representative",
+        "domain": "Sales, Retail & Product Promotion",
+        "stream": "Sales & Business",
+        "fresher_salary": "₹4.0 LPA – ₹8.5 LPA",
+        "experienced_salary": "₹9.0 LPA – ₹18.0 LPA",
+        "hiring_companies": ["Samsung", "Apple", "Maple Leaf", "Reliance Retail", "Unilever", "Summit Peak"],
+        "market_demand": "📈 Rapidly Growing (Retail & Consumer Tech)",
+        "description": "Engages customers, delivers compelling live product demonstrations, drives retail sales, and manages promotional events and brand experiences.",
+        "full_text": "Demo Specialist Sales Representative Product Demonstration Customer Engagement Sales Techniques Product Knowledge Presentation Skills Retail Sales Customer Experience Event Planning Promotional Materials Merchandising Inventory Management Sales Promotion Customer Service Lead Generation Negotiation Sales Reporting Key Account Management Direct Sales",
+        "core_skills": ["Product Demonstration", "Customer Engagement", "Sales Techniques", "Product Knowledge", "Presentation Skills", "Communication"],
+        "preferred_skills": ["Event Planning", "Promotional Materials", "Logistics", "Marketing", "Retail Sales", "Sales Reporting", "Customer Service"],
+        "learning_resources": {
+            "Sales Analytics": "Master CRM software (Salesforce, HubSpot) and retail sales tracking analytics.",
+            "Digital Marketing": "Learn social media product promotion and digital lead generation techniques."
         }
     }
 }
@@ -149,7 +149,7 @@ JOB_PROFILES = {
 
 class JobMatcher:
     """
-    Hybrid AI Job Matching Engine with Placement Market Analytics.
+    Hybrid AI Job Matching Engine with Automatic Stream & Branch Detection.
     """
 
     @classmethod
@@ -165,10 +165,37 @@ class JobMatcher:
             return 0.0
 
     @classmethod
+    def detect_stream_preference(cls, raw_resume_text: str, candidate_skills: List[str]) -> str:
+        """Detect the dominant academic/career stream (Tech, Finance, Sales) from raw text."""
+        text_lower = (raw_resume_text + " " + " ".join(candidate_skills)).lower()
+
+        tech_keywords = [
+            "python", "java", "c++", "b.tech", "btech", "engineering", "computer", "developer", "software",
+            "data", "ai", "machine learning", "deep learning", "sql", "html", "css", "react", "node", "git",
+            "database", "algorithm", "full-stack", "fullstack", "backend", "frontend", "project"
+        ]
+        finance_keywords = ["tally", "finance", "accounting", "tax", "gst", "valuation", "b.com", "bcom", "mba finance", "balance sheet"]
+        sales_keywords = ["sales", "retail", "store", "counter", "promoter", "customer service", "merchandising"]
+
+        tech_score = sum(1 for kw in tech_keywords if kw in text_lower)
+        finance_score = sum(1 for kw in finance_keywords if kw in text_lower)
+        sales_score = sum(1 for kw in sales_keywords if kw in text_lower)
+
+        if tech_score >= finance_score and tech_score >= sales_score:
+            return "Tech & Engineering"
+        elif finance_score > sales_score:
+            return "Finance & Commerce"
+        elif sales_score > 0:
+            return "Sales & Business"
+        return "Tech & Engineering"
+
+    @classmethod
     def calculate_match(cls, candidate_skills: List[str], target_job_key: str = None, raw_resume_text: str = "") -> Dict[str, Any]:
         cand_skills_lower = set([s.lower() for s in candidate_skills])
         results = []
         target_analysis = None
+
+        detected_stream = cls.detect_stream_preference(raw_resume_text, candidate_skills)
 
         for key, profile in JOB_PROFILES.items():
             core_set = set([s.lower() for s in profile["core_skills"]])
@@ -192,12 +219,17 @@ class JobMatcher:
             else:
                 embedding_score = keyword_score
 
+            # Give stream-aligned jobs a slight contextual boost
+            stream_boost = 5.0 if profile["stream"] == detected_stream else 0.0
+
             if keyword_score > 0 and embedding_score > 0:
-                hybrid_score = round((keyword_score * 0.6) + (embedding_score * 0.4), 1)
+                hybrid_score = round((keyword_score * 0.6) + (embedding_score * 0.4) + stream_boost, 1)
             elif keyword_score > 0:
-                hybrid_score = keyword_score
+                hybrid_score = round(keyword_score + stream_boost, 1)
             else:
-                hybrid_score = round(embedding_score * 0.5, 1)
+                hybrid_score = round((embedding_score * 0.5) + stream_boost, 1)
+
+            hybrid_score = min(100.0, hybrid_score)
 
             matched_skills_formatted = [cls.format_skill_name(s) for s in matched_all]
             missing_high_priority = [cls.format_skill_name(s) for s in missing_core]
