@@ -5,6 +5,7 @@
  * 2. Timed Live Mock Interview Test (10 Questions - 10 Min Limit) with AI Model Answer Comparison & Match %
  * 3. Placement Salary & Market Demand Intelligence
  * 4. ATS Health Compliance Audit (0-100 Score)
+ * 5. Full Mobile Touch & Mobile Web Compatibility
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -434,7 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const formatted = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         testTimerText.innerHTML = `<i class="fa-solid fa-stopwatch"></i> ⏱️ ${formatted}`;
         if (secondsRemaining < 120) {
-            testTimerText.style.color = "#f43f5e"; // Turn red in last 2 minutes
+            testTimerText.style.color = "#f43f5e";
         } else {
             testTimerText.style.color = "#e9d5ff";
         }
@@ -604,9 +605,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    btnBrowse.addEventListener("click", (e) => {
-        e.preventDefault();
-        fileInput.click();
+    // Mobile & Desktop Touch File Selection Handlers
+    dropZone.addEventListener("click", (e) => {
+        if (e.target !== btnRemoveFile && !btnRemoveFile.contains(e.target)) {
+            fileInput.click();
+        }
     });
 
     fileInput.addEventListener("change", (e) => {
@@ -917,7 +920,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         resultsSection.classList.remove("hidden");
-        resultsSection.scrollIntoView({ behavior: "smooth" });
+        
+        // Smooth scroll for mobile & desktop
+        window.scrollTo({
+            top: resultsSection.offsetTop - 30,
+            behavior: "smooth"
+        });
     }
 
     btnPrintReport.addEventListener("click", () => {

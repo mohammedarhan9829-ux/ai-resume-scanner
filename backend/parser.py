@@ -58,23 +58,26 @@ class ResumeParser:
     @staticmethod
     def preprocess_image(image: Image.Image) -> Image.Image:
         """Apply image processing to improve OCR quality for scanned resumes/images."""
-        # Convert to RGB then Grayscale
         if image.mode != "RGB":
             image = image.convert("RGB")
         image = image.convert("L")
         
-        # Resize image if small to increase OCR resolution
+        # Resize image: downscale large smartphone camera photos (>2000px) to prevent OOM on mobile
         width, height = image.size
-        if width < 1500:
-            scale = 2.0
+        if width > 2000 or height > 2000:
+            max_dim = max(width, height)
+            scale = 2000.0 / max_dim
+            image = image.resize((int(width * scale), int(height * scale)), Image.Resampling.LANCZOS)
+        elif width < 1200:
+            scale = 1.8
             image = image.resize((int(width * scale), int(height * scale)), Image.Resampling.LANCZOS)
 
         # Enhance Contrast
         enhancer = ImageEnhance.Contrast(image)
-        image = enhancer.enhance(2.5)
+        image = enhancer.enhance(2.0)
         # Sharpness
         enhancer = ImageEnhance.Sharpness(image)
-        image = enhancer.enhance(2.0)
+        image = enhancer.enhance(1.5)
         return image
 
     @classmethod
@@ -144,10 +147,8 @@ class ResumeParser:
 
             if PYTESSERACT_AVAILABLE:
                 try:
-                    # Try standard OCR first
                     text = pytesseract.image_to_string(processed_img)
                     if not text or len(text.strip()) < 15:
-                        # Try original un-preprocessed image if contrast thresholding was too aggressive
                         text = pytesseract.image_to_string(image)
                     
                     if text and len(text.strip()) > 15:
