@@ -523,15 +523,15 @@ document.addEventListener("DOMContentLoaded", () => {
             liveTestContainer.classList.remove("hidden");
             testEvalResultsContainer.classList.add("hidden");
             
-            // Start 5-Minute (300s) Express Countdown Timer
-            startCountdownTimer(300);
+            // Start 2-Minute (120s) Express Countdown Timer
+            startCountdownTimer(120);
             renderTestQuestion(currentQIndex);
 
         } catch (err) {
             alert(`Test Error: ${err.message}`);
         } finally {
             btnStartLiveTest.disabled = false;
-            btnStartLiveTest.innerHTML = `<i class="fa-solid fa-rotate-right"></i> Restart Express 5-Min Test`;
+            btnStartLiveTest.innerHTML = `<i class="fa-solid fa-rotate-right"></i> Restart Express 2-Min Test`;
         }
     });
 
@@ -546,7 +546,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (secondsRemaining <= 0) {
                 clearInterval(testTimerInterval);
-                alert("⏱️ Time's Up! 5-minute express interview limit reached. Auto-submitting test for AI Evaluation...");
+                alert("⏱️ Time's Up! 2-minute express interview limit reached. Auto-submitting test for AI Evaluation...");
                 submitTestAnswers();
             }
         }, 1000);
@@ -557,7 +557,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const secs = secondsRemaining % 60;
         const formatted = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         testTimerText.innerHTML = `<i class="fa-solid fa-stopwatch"></i> ⏱️ ${formatted}`;
-        if (secondsRemaining < 120) {
+        if (secondsRemaining < 40) {
             testTimerText.style.color = "#f43f5e";
         } else {
             testTimerText.style.color = "#e9d5ff";
