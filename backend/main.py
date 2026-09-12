@@ -75,6 +75,7 @@ class MockInterviewSchema(BaseModel):
 class LiveInterviewGenSchema(BaseModel):
     job_title: str
     domain: Optional[str] = "General"
+    extracted_skills: Optional[List[str]] = []
 
 class AnswerEvalItem(BaseModel):
     question: str
@@ -107,27 +108,33 @@ def get_local_ip() -> str:
 
 @app.post("/api/ai/live-interview/questions")
 def generate_10_interview_questions(data: LiveInterviewGenSchema, authorization: Optional[str] = Header(None)):
-    """Generate 10 field-specific Technical & HR interview questions with ideal AI model answers."""
+    """Generate 10 random field-specific Technical & HR interview questions based directly on candidate extracted resume skills."""
+    import random
     job_title = data.job_title
     domain = data.domain or "General Field"
+    user_skills = [s.strip() for s in data.extracted_skills if s and len(s.strip()) > 1] if data.extracted_skills else []
 
     client = OpenAIService.get_client()
     if client:
         try:
-            prompt = f"""Generate EXACTLY 10 DIRECT, PRACTICAL, HIGHLY FIELD-SPECIFIC placement interview questions for a candidate targeting the role '{job_title}' in the domain of '{domain}'.
+            skills_str = ", ".join(user_skills[:12]) if user_skills else domain
+            prompt = f"""Generate EXACTLY 10 RANDOM, DIRECT, PRACTICAL placement interview questions for a candidate targeting the role '{job_title}'.
+
+EXTRACTED RESUME SKILLS TO TEST: [{skills_str}]
 
 CRITICAL INSTRUCTIONS:
-1. Do NOT use generic template questions (e.g. do NOT ask "explain architecture of {job_title}").
-2. Ask DIRECT, PRACTICAL questions that directly test day-to-day concepts, tools, formulas, or syntax in '{job_title}' (e.g., if Python/Data: ask SQL joins, pandas, functions; if Finance: ask NPV/IRR, financial statements; if Healthcare: ask patient care protocols; if Marketing/HR: ask CAC/LTV, recruitment metrics; if Engineering/Design: ask stress testing, CAD, user research).
-3. Include 7 direct technical/functional questions, 2 real-world scenario questions, and 1 HR/career vision question.
-4. Provide concise practical hints and complete ideal model answers for each.
+1. Generate RANDOM, UNIQUE questions tailored directly to testing the candidate's extracted resume skills ({skills_str}).
+2. Ask DIRECT, PRACTICAL questions that test real day-to-day tools, syntax, formulas, or methods for those exact skills (e.g. if Python: ask Pandas/lists; if SQL: ask JOINs/GROUP BY; if Finance: ask NPV/IRR; if Healthcare: ask clinical protocols).
+3. Randomize the questions across different skills so the test is dynamic every time.
+4. Include 7 direct technical questions, 2 real-world scenario questions, and 1 HR/career vision question.
+5. Provide concise practical hints and complete ideal model answers for each.
 
 Return ONLY a valid JSON list of 10 objects: [{"id": 1, "category": "Technical/Scenario/HR", "question": "...", "hints": "...", "ideal_answer": "..."}]"""
 
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": prompt}],
-                temperature=0.6,
+                temperature=0.7,
                 max_tokens=1500
             )
 
@@ -138,80 +145,97 @@ Return ONLY a valid JSON list of 10 objects: [{"id": 1, "category": "Technical/S
                 content_text = content_text.replace("```", "").strip()
             import json
             questions = json.loads(content_text)
+            random.shuffle(questions)
+            for idx, q in enumerate(questions, 1):
+                q["id"] = idx
             return {"success": True, "job_title": job_title, "questions": questions}
         except Exception as e:
             logger.warning(f"OpenAI interview generation error: {e}")
 
-    # Domain-Aware Direct Field Fallback Question Suites
-    domain_lower = (domain + " " + job_title).lower()
-    
-    if any(k in domain_lower for k in ["data", "analyst", "science", "python", "ai", "machine learning"]):
-        fallback_10 = [
-            {"id": 1, "category": "Technical Core", "question": f"What is the difference between INNER JOIN, LEFT JOIN, and FULL OUTER JOIN in SQL?", "hints": "Focus on matching rows vs non-matching null values.", "ideal_answer": "INNER JOIN returns only matching rows from both tables. LEFT JOIN returns all rows from left table plus matching rows from right. FULL OUTER JOIN returns all rows when there is a match in either left or right table."},
-            {"id": 2, "category": "Technical Core", "question": f"How do you handle missing or NULL values in a dataset using Python Pandas?", "hints": "Mention dropna(), fillna(), and imputation methods.", "ideal_answer": "Missing values are handled by dropping rows (dropna()), imputing with mean/median/mode (fillna()), or using forward/backward fill algorithms depending on distribution."},
-            {"id": 3, "category": "Technical Core", "question": f"Explain overfitting vs underfitting in machine learning models and how to prevent them.", "hints": "Discuss model complexity, bias-variance tradeoff, cross-validation.", "ideal_answer": "Overfitting happens when a model learns noise in training data (high variance, low bias). Underfitting happens when a model is too simple (high bias). Prevent overfitting using regularization (L1/L2), cross-validation, and pruning."},
-            {"id": 4, "category": "Technical Core", "question": f"What is the difference between SQL GROUP BY and HAVING clauses?", "hints": "WHERE filters before grouping, HAVING filters after grouping.", "ideal_answer": "WHERE filters individual rows before aggregation occurs. HAVING filters aggregated group results after GROUP BY is applied."},
-            {"id": 5, "category": "Technical Core", "question": f"What is the difference between supervised and unsupervised machine learning?", "hints": "Labeled target variables vs unlabeled cluster patterns.", "ideal_answer": "Supervised learning uses labeled target data to train classification/regression models. Unsupervised learning finds hidden patterns/clusters in unlabeled data without target outputs."},
-            {"id": 6, "category": "Technical Core", "question": f"How do you calculate metrics like Precision, Recall, and F1-Score?", "hints": "True Positives, False Positives, False Negatives formulas.", "ideal_answer": "Precision = TP / (TP + FP) measures accuracy of positive predictions. Recall = TP / (TP + FN) measures proportion of actual positives captured. F1-Score is the harmonic mean of Precision and Recall."},
-            {"id": 7, "category": "Technical Core", "question": f"Which Python libraries do you use for data analysis and visualization?", "hints": "Pandas, NumPy, Matplotlib, Seaborn, Scikit-learn.", "ideal_answer": "NumPy for numerical arrays, Pandas for DataFrame manipulation, Matplotlib/Seaborn for charts, and Scikit-learn for machine learning modeling."},
-            {"id": 8, "category": "Scenario", "question": f"Scenario: Your production dashboard metrics dropped by 20% overnight. How do you investigate?", "hints": "Check data pipeline health, source APIs, outliers, and system logs.", "ideal_answer": "First verify data pipeline ingestion logs to check for failed ETL jobs. Then inspect null counts, check for schema changes in upstream APIs, and segment data by region/device to isolate the anomaly."},
-            {"id": 9, "category": "Scenario", "question": f"Scenario: A stakeholder requests insights from noisy data with conflicting formats. How do you clean it?", "hints": "Data profiling, normalization, Regex parsing, data validation.", "ideal_answer": "Profile the dataset to audit inconsistencies, apply Regex for string cleaning, standardize date formats, handle duplicate records, and document transformations in a reproducible script."},
-            {"id": 10, "category": "HR & Career", "question": f"Why do you want to specialize as a {job_title} and how do you stay updated with industry developments?", "hints": "Continuous learning, tech blogs, Kaggle, GitHub projects.", "ideal_answer": "I am passionate about solving real business problems with data-driven insights. I stay updated by analyzing Kaggle datasets, reading tech research, and building open-source projects."}
-        ]
-    elif any(k in domain_lower for k in ["finan", "account", "tax", "audit", "banking", "commerce"]):
-        fallback_10 = [
-            {"id": 1, "category": "Technical Core", "question": f"What are the 3 main financial statements and how do they link together?", "hints": "Income Statement, Balance Sheet, Cash Flow Statement.", "ideal_answer": "Net Income from Income Statement flows into Retained Earnings on the Balance Sheet and starts the Cash Flow Statement. Cash balance from Cash Flow updates Cash on the Balance Sheet."},
-            {"id": 2, "category": "Technical Core", "question": f"What is the difference between Net Present Value (NPV) and Internal Rate of Return (IRR)?", "hints": "Time value of money, discount rates, capital budgeting.", "ideal_answer": "NPV is the total present value of future cash flows minus initial investment. IRR is the discount rate that makes NPV equal to zero."},
-            {"id": 3, "category": "Technical Core", "question": f"How do you calculate Working Capital, and why is it critical for liquidity?", "hints": "Current Assets minus Current Liabilities.", "ideal_answer": "Working Capital = Current Assets - Current Liabilities. It measures short-term financial health and operational efficiency to meet immediate debt obligations."},
-            {"id": 4, "category": "Technical Core", "question": f"What is the difference between EBITDA and Net Income?", "hints": "Operating performance before interest, tax, depreciation, amortization.", "ideal_answer": "EBITDA measures pure operational profitability before non-operating expenses (interest, taxes, depreciation, amortization). Net Income is final profit after all expenses."},
-            {"id": 5, "category": "Technical Core", "question": f"Explain Variance Analysis in financial budgeting.", "hints": "Comparing actual revenue/expenses vs budgeted estimates.", "ideal_answer": "Variance Analysis evaluates differences between planned financial budget figures and actual accounting figures to identify operational efficiencies or cost overruns."},
-            {"id": 6, "category": "Technical Core", "question": f"What Excel functions do you master for financial modeling?", "hints": "VLOOKUP/XLOOKUP, INDEX/MATCH, NPV, IRR, PMT, Pivot Tables.", "ideal_answer": "Advanced modeling utilizes XLOOKUP and INDEX/MATCH for dynamic data retrieval, Pivot Tables for aggregation, and financial functions like NPV, IRR, and PMT for valuation."},
-            {"id": 7, "category": "Technical Core", "question": f"How do you calculate Break-Even Point in units and revenue?", "hints": "Fixed Costs / (Price - Variable Cost per unit).", "ideal_answer": "Break-Even Units = Fixed Costs / (Selling Price per Unit - Variable Cost per Unit). Break-Even Revenue = Break-Even Units x Selling Price per Unit."},
-            {"id": 8, "category": "Scenario", "question": f"Scenario: A company's revenue increased by 15% but net cash flow decreased. What caused this?", "hints": "Accounts receivable growth, delayed collections, inventory buildup.", "ideal_answer": "Uncollected credit sales (increased Accounts Receivable), excess inventory purchases, or debt repayments can increase top-line revenue without generating immediate cash inflows."},
-            {"id": 9, "category": "Scenario", "question": f"Scenario: You spot a financial discrepancy in quarterly reporting. How do you report it?", "hints": "Audit trail, re-reconciling accounts, notifying senior finance manager.", "ideal_answer": "Re-verify primary journal entries and ledger reconciliations to trace the error source, document the variance, and report findings to the Lead Financial Controller with corrective entries."},
-            {"id": 10, "category": "HR & Career", "question": f"Why are you targeting a career as a {job_title}?", "hints": "Financial acumen, analytical problem-solving, strategic planning.", "ideal_answer": "I thrive on analyzing financial metrics to guide strategic decision-making, optimizing capital allocation, and driving sustainable business growth."}
-        ]
-    elif any(k in domain_lower for k in ["market", "sales", "hr", "human", "recruit", "business"]):
-        fallback_10 = [
-            {"id": 1, "category": "Technical Core", "question": f"What is the difference between Customer Acquisition Cost (CAC) and Lifetime Value (LTV)?", "hints": "Cost to acquire a customer vs total revenue earned from customer.", "ideal_answer": "CAC is total marketing/sales spend divided by new customers acquired. LTV is total revenue a customer generates throughout their relationship. A healthy ratio is LTV >= 3x CAC."},
-            {"id": 2, "category": "Technical Core", "question": f"How do you calculate Click-Through Rate (CTR) and Conversion Rate?", "hints": "Clicks/Impressions vs Conversions/Clicks formulas.", "ideal_answer": "CTR = (Total Clicks / Total Impressions) x 100%. Conversion Rate = (Total Conversions / Total Clicks) x 100%."},
-            {"id": 3, "category": "Technical Core", "question": f"What are the main stages of a B2B Sales / Recruitment Funnel?", "hints": "Awareness, Interest/Sourcing, Consideration/Interview, Conversion/Offer.", "ideal_answer": "Prospecting/Sourcing -> Qualification -> Demo/Interview Evaluation -> Proposal/Offer -> Closed Won/Hired."},
-            {"id": 4, "category": "Technical Core", "question": f"Explain SEO On-Page vs Off-Page optimization techniques.", "hints": "Keywords, meta tags, headers vs backlinks, domain authority.", "ideal_answer": "On-Page SEO optimizes content, meta tags, headers, and internal linking. Off-Page SEO builds domain authority via high-quality backlinks and brand mentions."},
-            {"id": 5, "category": "Technical Core", "question": f"What strategies do you use for candidate sourcing or lead generation?", "hints": "LinkedIn Recruiter/Sales Navigator, outbound campaigns, content marketing.", "ideal_answer": "Multi-channel sourcing via LinkedIn, targeted cold email outreach, inbound content lead magnets, and referral networks."},
-            {"id": 6, "category": "Technical Core", "question": f"What CRM or Marketing automation platforms do you use?", "hints": "HubSpot, Salesforce, Google Analytics, Mailchimp.", "ideal_answer": "Salesforce/HubSpot for pipeline tracking, Google Analytics for traffic insights, and Mailchimp for automated drip marketing."},
-            {"id": 7, "category": "Technical Core", "question": f"How do you perform A/B testing on ad creatives or landing pages?", "hints": "Isolating one variable (headline, CTA, image) with equal audience split.", "ideal_answer": "Change a single variable (e.g. CTA text or hero image), split audience randomly, run until statistically significant sample size, and choose higher converting variant."},
-            {"id": 8, "category": "Scenario", "question": f"Scenario: An ad campaign has high clicks but zero conversions. How do you fix it?", "hints": "Check landing page relevance, slow load speed, broken CTA form.", "ideal_answer": "Audit landing page load time, ensure offer matches ad headline, check mobile responsiveness, and test sign-up form submission to fix friction points."},
-            {"id": 9, "category": "Scenario", "question": f"Scenario: How do you handle price or salary negotiation objections from clients/candidates?", "hints": "Focus on value proposition, total benefits package, ROI.", "ideal_answer": "Listen actively, reframe objections around long-term ROI and core value drivers, and present flexible structure options without compromising quality."},
-            {"id": 10, "category": "HR & Career", "question": f"What drives your success in a {job_title} role?", "hints": "Relationship building, data-driven strategy, resilience.", "ideal_answer": "Combining data-driven strategy with authentic relationship building, maintaining resilience, and continuously delivering measurable growth results."}
-        ]
-    elif any(k in domain_lower for k in ["health", "nurse", "medical", "pharm", "clinic", "doctor"]):
-        fallback_10 = [
-            {"id": 1, "category": "Technical Core", "question": f"What are the 5 Rights of Medication Administration in clinical care?", "hints": "Right Patient, Right Drug, Right Dose, Right Route, Right Time.", "ideal_answer": "1. Right Patient 2. Right Medication 3. Right Dose 4. Right Route 5. Right Time."},
-            {"id": 2, "category": "Technical Core", "question": f"How do you perform triage and prioritize patient care in emergency settings?", "hints": "Emergency Severity Index (ESI), Airway/Breathing/Circulation (ABCs).", "ideal_answer": "Prioritize based on life-threatening status (Airway, Breathing, Circulation) using standardized triage scales (ESI 1 to 5) to treat critical patients immediately."},
-            {"id": 3, "category": "Technical Core", "question": f"What is the difference between sterile and aseptic techniques?", "hints": "Elimination of ALL microorganisms vs preventing infection transfer.", "ideal_answer": "Sterile technique eliminates ALL microorganisms from instruments/fields. Aseptic technique includes procedures used to prevent contamination and pathogen transfer."},
-            {"id": 4, "category": "Technical Core", "question": f"How do you monitor vital signs and identify early signs of patient deterioration?", "hints": "BP, Heart Rate, SpO2, Resp Rate, NEWS score.", "ideal_answer": "Regular monitoring of Blood Pressure, Pulse, Oxygen Saturation, and Respiratory Rate, tracking National Early Warning Scores (NEWS) to detect sepsis or hypoxia early."},
-            {"id": 5, "category": "Technical Core", "question": f"What steps ensure HIPAA compliance and patient data confidentiality?", "hints": "Secure EHR systems, no public disclosure, encrypted communications.", "ideal_answer": "Access Electronic Health Records (EHR) on encrypted terminals only, never discuss patient info in non-secure areas, and follow strict consent protocols."},
-            {"id": 6, "category": "Technical Core", "question": f"What are the standard hospital infection control protocols?", "hints": "Hand hygiene, PPE, isolation precautions, biohazard disposal.", "ideal_answer": "Strict hand washing before/after contact, proper PPE donning/doffing, isolation protocols (contact/droplet/airborne), and safe disposal of sharps and biohazard waste."},
-            {"id": 7, "category": "Technical Core", "question": f"How do you handle difficult patient communication or breaking bad news?", "hints": "SPIKES protocol, empathy, active listening, clear explanations.", "ideal_answer": "Use empathetic active listening (SPIKES framework), provide information clearly without medical jargon, allow space for questions, and offer support resources."},
-            {"id": 8, "category": "Scenario", "question": f"Scenario: A patient exhibits signs of an anaphylactic allergic reaction. What immediate steps do you take?", "hints": "Stop causative agent, call rapid response, administer epinephrine/oxygen.", "ideal_answer": "Immediately stop offending medication/IV, assess airway/breathing, call rapid response, elevate legs, administer prescribed Epinephrine, and give high-flow oxygen."},
-            {"id": 9, "category": "Scenario", "question": f"Scenario: A busy shift is understaffed. How do you maintain patient safety?", "hints": "Focus on high-risk clinical tasks, delegate appropriately, communicate with charge nurse.", "ideal_answer": "Re-prioritize critical care treatments and medication passes, delegate non-clinical tasks appropriately, inform charge nurse, and maintain open safety communication."},
-            {"id": 10, "category": "HR & Career", "question": f"Why did you choose a clinical career as a {job_title}?", "hints": "Patient advocacy, clinical excellence, compassionate care.", "ideal_answer": "Dedicated to delivering high-quality, compassionate patient care, continuously updating clinical skills, and advocating for patient health outcomes."}
-        ]
-    else: # Software / Web / Engineering / General Default
-        fallback_10 = [
-            {"id": 1, "category": "Technical Core", "question": f"What is the difference between REST APIs and GraphQL APIs?", "hints": "Fixed endpoints/over-fetching vs single endpoint/flexible query schemas.", "ideal_answer": "REST relies on fixed endpoints per resource (can cause over-fetching or under-fetching). GraphQL uses a single endpoint allowing clients to request exact fields needed."},
-            {"id": 2, "category": "Technical Core", "question": f"How do database indexes speed up query performance, and what is the trade-off?", "hints": "B-Tree structures speed up SELECTs but slow down INSERT/UPDATE/DELETE.", "ideal_answer": "Indexes create data lookup trees (like B-Trees) allowing logarithmic O(log N) search times instead of full table scans. Trade-off: increases disk space and slows down write operations."},
-            {"id": 3, "category": "Technical Core", "question": f"Explain git rebase vs git merge, and when to use each.", "hints": "Linear commit history vs preserving actual chronological branch merges.", "ideal_answer": "Git merge creates a new merge commit combining history. Git rebase rewrites feature branch commits onto top of main for a clean linear history. Avoid rebasing public shared branches."},
-            {"id": 4, "category": "Technical Core", "question": f"What is CORS (Cross-Origin Resource Sharing) and how do you resolve CORS errors?", "hints": "Browser security blocking requests across different origins/domains.", "ideal_answer": "CORS is a browser security mechanism restricting web pages from making API requests to a different domain. Resolved by configuring Access-Control-Allow-Origin headers on backend server."},
-            {"id": 5, "category": "Technical Core", "question": f"Explain Docker containerization vs Virtual Machines (VMs).", "hints": "Shared host OS kernel vs full guest operating system hypervisor.", "ideal_answer": "Docker containers share the host OS kernel and package application code with dependencies (lightweight, fast start). VMs run full guest OS over hypervisors (heavier, higher overhead)."},
-            {"id": 6, "category": "Technical Core", "question": f"How do you implement input validation and error handling in production code?", "hints": "Schema validation libraries, explicit try-except, HTTP status codes.", "ideal_answer": "Enforce strict schema validation (e.g. Pydantic), sanitize inputs, catch specific exceptions, log structured errors, and return clear HTTP status codes."},
-            {"id": 7, "category": "Technical Core", "question": f"What is the difference between synchronous and asynchronous code execution?", "hints": "Blocking single-thread execution vs non-blocking event loops.", "ideal_answer": "Synchronous code blocks thread execution until task completes. Asynchronous code yields execution to event loop during I/O wait, allowing concurrent processing."},
-            {"id": 8, "category": "Scenario", "question": f"Scenario: A web API returns 504 Gateway Timeout under heavy user traffic. How do you troubleshoot?", "hints": "Inspect database connection pools, slow queries, caching, load balancing.", "ideal_answer": "Check server CPU/memory metrics, profile slow SQL queries, add Redis caching, optimize connection pool limits, and scale worker processes behind load balancer."},
-            {"id": 9, "category": "Scenario", "question": f"Scenario: A critical bug is found in production right after deployment. What is your rollback procedure?", "hints": "Roll back to previous release version tag, isolate bug in staging, hotfix.", "ideal_answer": "Immediately roll back deployment to previous stable Git tag/container image, verify system stability, isolate bug with unit tests in staging, and release tested hotfix."},
-            {"id": 10, "category": "HR & Career", "question": f"Why do you want to excel as a {job_title} in our engineering team?", "hints": "Technical passion, problem solving, continuous learning.", "ideal_answer": "Driven by writing scalable code, building reliable architectures, and solving high-impact problems while continuously expanding technical expertise."}
-        ]
+    # Skill-Aware Dynamic Fallback Suite
+    generated_questions = []
 
-    return {"success": True, "job_title": job_title, "questions": fallback_10}
+    # Map specific extracted skills to direct technical questions
+    skill_question_bank = {
+        "python": [
+            ("Technical Core", "How do list comprehensions work in Python? Write an example to filter even numbers from a list.", "Syntax: [x for x in list if x % 2 == 0].", "List comprehensions provide a concise syntax to create lists: `[x for x in lst if x % 2 == 0]`."),
+            ("Technical Core", "What is the difference between mutable and immutable data types in Python?", "Lists/Dicts are mutable, Tuples/Strings are immutable.", "Mutable objects (lists, dicts) can be changed in place. Immutable objects (tuples, strings, ints) cannot be altered after creation.")
+        ],
+        "sql": [
+            ("Technical Core", "What is the difference between WHERE and HAVING clauses in SQL?", "WHERE filters rows before aggregation; HAVING filters after GROUP BY.", "WHERE filters individual rows before grouping. HAVING filters aggregated results after GROUP BY."),
+            ("Technical Core", "Explain INNER JOIN vs LEFT JOIN with a database table example.", "INNER returns matching rows only; LEFT returns all left rows plus matching right rows.", "INNER JOIN returns matching rows across both tables. LEFT JOIN retains all rows from the left table and appends matching right table columns.")
+        ],
+        "pandas": [
+            ("Technical Core", "How do you handle missing NaN values in Pandas using dropna() vs fillna()?", "dropna() removes missing rows; fillna() replaces them with mean/median.", "dropna() removes rows containing null values. fillna() imputes missing values with specified scalars, mean, or median.")
+        ],
+        "excel": [
+            ("Technical Core", "What is the difference between VLOOKUP and XLOOKUP in Microsoft Excel?", "XLOOKUP searches left or right without column index limitations.", "XLOOKUP replaces VLOOKUP by searching in any direction without needing static column index numbers.")
+        ],
+        "financial": [
+            ("Technical Core", "What is Net Present Value (NPV) vs Internal Rate of Return (IRR)?", "Discounted future cash flows minus initial investment.", "NPV calculates the present value of future cash flows minus initial cost. IRR is the discount rate that sets NPV to zero.")
+        ],
+        "machine learning": [
+            ("Technical Core", "Explain overfitting vs underfitting in machine learning models and how to fix them.", "High variance vs high bias; fix with regularization and cross-validation.", "Overfitting happens when a model learns training noise (high variance). Fix using L1/L2 regularization, cross-validation, and pruning.")
+        ],
+        "docker": [
+            ("Technical Core", "What is the difference between a Docker image and a Docker container?", "Blueprint template vs running container instance.", "A Docker image is a read-only blueprint template. A Docker container is a runnable isolated instance of that image.")
+        ],
+        "tableau": [
+            ("Technical Core", "How do calculated fields and dynamic parameters work in Tableau dashboards?", "Creating custom metrics and interactive user filters.", "Calculated fields create custom formulas. Parameters allow users to dynamically swap metrics and filters across worksheets.")
+        ]
+    }
+
+    # Match candidate's extracted skills
+    matched_qs = []
+    if user_skills:
+        for skill in user_skills:
+            sk_lower = skill.lower()
+            for key, q_list in skill_question_bank.items():
+                if key in sk_lower:
+                    for item in q_list:
+                        matched_qs.append({
+                            "category": item[0],
+                            "question": item[1],
+                            "hints": item[2],
+                            "ideal_answer": item[3]
+                        })
+
+    # Domain-Aware Base Pool
+    domain_lower = (domain + " " + job_title).lower()
+    base_pool = [
+        {"category": "Technical Core", "question": f"What are the most critical tools, libraries, or methodologies you use for {job_title}?", "hints": f"Mention industry tools and core frameworks for {job_title}.", "ideal_answer": f"Core execution relies on industry-standard tools, robust validation, and scalable pipelines tailored for {job_title}."},
+        {"category": "Technical Core", "question": f"How do you validate data integrity and handle unexpected edge cases in {job_title} workflows?", "hints": "Mention schema validation, error handling, and logging.", "ideal_answer": "Data integrity is maintained using input sanitization, schema boundary checks, structured exception handling, and error telemetry."},
+        {"category": "Scenario", "question": f"Scenario: A critical project task in {job_title} encounters unexpected failure 1 hour before a deadline. How do you resolve it?", "hints": "Isolate root cause, communicate with team, deploy fallback.", "ideal_answer": "Isolate root cause using log traces, communicate status transparently to stakeholders, and deploy verified fallback path."},
+        {"category": "HR & Career", "question": f"Why do you want to excel in a {job_title} role, and how do you continuously upgrade your technical skills?", "hints": "Continuous learning, real-world projects, industry certifications.", "ideal_answer": "Driven by technical mastery, building high-impact solutions, and staying updated via hands-on projects and continuous research."}
+    ]
+
+    all_questions = matched_qs + base_pool
+    random.shuffle(all_questions)
+
+    # Pick 10 unique questions
+    unique_qs = []
+    seen = set()
+    for q in all_questions:
+        if q["question"] not in seen:
+            seen.add(q["question"])
+            unique_qs.append(q)
+            if len(unique_qs) >= 10:
+                break
+
+    # If fewer than 10, fill up with generic domain prompts
+    while len(unique_qs) < 10:
+        idx_num = len(unique_qs) + 1
+        unique_qs.append({
+            "category": "Technical Core",
+            "question": f"Question #{idx_num}: Describe a practical project where you applied {user_skills[idx_num % len(user_skills)] if user_skills else job_title} to solve a real-world problem.",
+            "hints": "Mention problem statement, technical tools used, and measurable results.",
+            "ideal_answer": "A strong answer highlights the core objective, technical steps taken, and quantitative metrics achieved."
+        })
+
+    for idx, q in enumerate(unique_qs, 1):
+        q["id"] = idx
+
+    return {"success": True, "job_title": job_title, "questions": unique_qs}
 
 
 def detect_ai_or_web_copy(text: str) -> tuple[bool, str]:

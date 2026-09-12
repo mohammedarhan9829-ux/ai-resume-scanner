@@ -486,8 +486,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!currentScanData) return;
         const jobTitle = currentScanData.target_job_analysis.title;
 
+        // Collect all candidate skills extracted from candidate resume
+        let extractedSkills = [];
+        if (currentScanData.categorized_skills) {
+            for (const [cat, skills] of Object.entries(currentScanData.categorized_skills)) {
+                if (Array.isArray(skills)) {
+                    extractedSkills.push(...skills);
+                }
+            }
+        }
+
         btnStartLiveTest.disabled = true;
-        btnStartLiveTest.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating 10 Questions...`;
+        btnStartLiveTest.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating 10 Resume-Matched Questions...`;
 
         try {
             const res = await fetch("/api/ai/live-interview/questions", {
@@ -498,7 +508,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
                 body: JSON.stringify({
                     job_title: jobTitle,
-                    domain: currentScanData.target_job_analysis.domain
+                    domain: currentScanData.target_job_analysis.domain,
+                    extracted_skills: extractedSkills
                 })
             });
 
