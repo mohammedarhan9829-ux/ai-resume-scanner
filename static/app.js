@@ -318,7 +318,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ gmail })
                 });
-                const data = await res.json();
+                let data;
+                const contentType = res.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    data = await res.json();
+                } else {
+                    throw new Error(`Server is deploying updates (${res.status}). Please click 'Resend OTP' again in a moment.`);
+                }
                 if (!res.ok) throw new Error(data.detail || "Failed to send OTP.");
                 
                 let infoHtml = `<strong><i class="fa-solid fa-paper-plane text-emerald"></i> 6-Digit OTP Code sent to '${gmail}'! Please check your Gmail Inbox (or Spam folder) for the email from mohammedarhan9829@gmail.com.</strong>`;
