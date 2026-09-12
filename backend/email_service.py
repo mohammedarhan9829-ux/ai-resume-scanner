@@ -11,11 +11,17 @@ GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "jqyghbiepedmlhad").re
 
 
 def get_smtp_connection():
-    """Establish authenticated TLS connection to Gmail SMTP server."""
-    server = smtplib.SMTP("smtp.gmail.com", 587, timeout=12)
-    server.starttls()
-    server.login(SENDER_EMAIL, GMAIL_APP_PASSWORD)
-    return server
+    """Establish authenticated connection to Gmail SMTP server (Port 587 TLS with Port 465 SSL fallback)."""
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=10)
+        server.starttls()
+        server.login(SENDER_EMAIL, GMAIL_APP_PASSWORD)
+        return server
+    except Exception as e:
+        logger.warning(f"SMTP Port 587 TLS connection failed ({e}). Attempting Port 465 SSL fallback...")
+        server = smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10)
+        server.login(SENDER_EMAIL, GMAIL_APP_PASSWORD)
+        return server
 
 
 def send_welcome_email(recipient_gmail: str, candidate_name: str = "Candidate") -> bool:

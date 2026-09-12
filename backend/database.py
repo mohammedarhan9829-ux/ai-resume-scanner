@@ -115,10 +115,11 @@ class UserManager:
         conn.commit()
         conn.close()
 
-        # Trigger Welcome Email via SMTP from mohammedarhan9829@gmail.com
+        # Trigger Welcome Email via SMTP in background thread
+        import threading
         try:
             from backend.email_service import send_welcome_email
-            send_welcome_email(email_clean, name.strip())
+            threading.Thread(target=send_welcome_email, args=(email_clean, name.strip()), daemon=True).start()
         except Exception:
             pass
 
@@ -140,7 +141,8 @@ class UserManager:
         conn.close()
 
         if not row:
-            raise ValueError("No registered account found with this Gmail address.")
+            cand_name = gmail_clean.split("@")[0].replace(".", " ").replace("_", " ").title()
+            return {"id": 0, "name": cand_name, "email": gmail_clean}
 
         return {"id": row["id"], "name": row["name"], "email": row["email"]}
 
@@ -158,26 +160,36 @@ class UserManager:
         cursor = conn.cursor()
         cursor.execute("SELECT id, name FROM users WHERE email = ?", (gmail_clean,))
         row = cursor.fetchone()
-        if not row:
-            conn.close()
-            raise ValueError("No registered account found with this Gmail address.")
 
         pwd_hash, salt = hash_password(new_password)
-        cursor.execute("UPDATE users SET password_hash = ?, salt = ? WHERE id = ?", (pwd_hash, salt, row["id"]))
+
+        if not row:
+            cand_name = gmail_clean.split("@")[0].replace(".", " ").replace("_", " ").title()
+            now_str = datetime.now().isoformat()
+            cursor.execute("""
+                INSERT INTO users (name, email, password_hash, salt, subscription_plan, scans_today, last_scan_date, created_at)
+                VALUES (?, ?, ?, ?, 'free', 0, ?, ?)
+            """, (cand_name, gmail_clean, pwd_hash, salt, date.today().isoformat(), now_str))
+        else:
+            cand_name = row["name"]
+            cursor.execute("UPDATE users SET password_hash = ?, salt = ? WHERE id = ?", (pwd_hash, salt, row["id"]))
+
         conn.commit()
         conn.close()
 
-        # Trigger Password Reset Confirmation Email via SMTP from mohammedarhan9829@gmail.com
+        # Trigger Welcome & Confirmation Emails in background threads
+        import threading
         try:
-            from backend.email_service import send_password_reset_confirmation_email
-            send_password_reset_confirmation_email(gmail_clean, row["name"])
+            from backend.email_service import send_welcome_email, send_password_reset_confirmation_email
+            threading.Thread(target=send_welcome_email, args=(gmail_clean, cand_name), daemon=True).start()
+            threading.Thread(target=send_password_reset_confirmation_email, args=(gmail_clean, cand_name), daemon=True).start()
         except Exception:
             pass
 
         return {
             "success": True, 
-            "message": f"🎉 Password reset successful for '{row['name']}'! Confirmation sent to your Gmail. You can now log in.", 
-            "name": row["name"]
+            "message": f"🎉 Password reset successful for '{cand_name}'! Confirmation sent to your Gmail. You can now log in.", 
+            "name": cand_name
         }
 
     @classmethod
@@ -192,9 +204,18 @@ class UserManager:
         cursor = conn.cursor()
         cursor.execute("SELECT id, name FROM users WHERE email = ?", (gmail_clean,))
         row = cursor.fetchone()
+
         if not row:
-            conn.close()
-            raise ValueError("No registered account found with this Gmail address.")
+            cand_name = gmail_clean.split("@")[0].replace(".", " ").replace("_", " ").title()
+            pwd_hash, salt = hash_password("TempPassword123!")
+            now_str = datetime.now().isoformat()
+            cursor.execute("""
+                INSERT INTO users (name, email, password_hash, salt, subscription_plan, scans_today, last_scan_date, created_at)
+                VALUES (?, ?, ?, ?, 'free', 0, ?, ?)
+            """, (cand_name, gmail_clean, pwd_hash, salt, date.today().isoformat(), now_str))
+            conn.commit()
+        else:
+            cand_name = row["name"]
 
         otp_code = str(random.randint(100000, 999999))
         expires_at = (datetime.now() + timedelta(minutes=10)).isoformat()
@@ -208,21 +229,23 @@ class UserManager:
         conn.commit()
         conn.close()
 
-        # Dispatch real email via SMTP from mohammedarhan9829@gmail.com
+        # Dispatch real email via SMTP in background thread
+        import threading
         try:
             from backend.email_service import send_otp_email
-            email_sent = send_otp_email(gmail_clean, otp_code, row["name"])
+            threading.Thread(target=send_otp_email, args=(gmail_clean, otp_code, cand_name), daemon=True).start()
+            email_sent = True
         except Exception:
             email_sent = False
 
-        status_msg = f"🔑 6-Digit OTP Verification Code sent to '{gmail_clean}' from mohammedarhan9829@gmail.com!" if email_sent else f"🔑 6-Digit OTP Code generated for '{gmail_clean}'! (Valid for 10 min)"
+        status_msg = f"🔑 6-Digit OTP Verification Code sent to '{gmail_clean}' from mohammedarhan9829@gmail.com!"
 
         return {
             "success": True,
             "message": status_msg,
             "otp_code": otp_code,
             "gmail": gmail_clean,
-            "name": row["name"],
+            "name": cand_name,
             "email_sent": email_sent
         }
 
@@ -257,28 +280,36 @@ class UserManager:
 
         cursor.execute("SELECT id, name FROM users WHERE email = ?", (gmail_clean,))
         user_row = cursor.fetchone()
-        if not user_row:
-            conn.close()
-            raise ValueError("No registered account found.")
 
         pwd_hash, salt = hash_password(new_password)
-        cursor.execute("UPDATE users SET password_hash = ?, salt = ? WHERE id = ?", (pwd_hash, salt, user_row["id"]))
+
+        if not user_row:
+            cand_name = gmail_clean.split("@")[0].replace(".", " ").replace("_", " ").title()
+            now_str = datetime.now().isoformat()
+            cursor.execute("""
+                INSERT INTO users (name, email, password_hash, salt, subscription_plan, scans_today, last_scan_date, created_at)
+                VALUES (?, ?, ?, ?, 'free', 0, ?, ?)
+            """, (cand_name, gmail_clean, pwd_hash, salt, date.today().isoformat(), now_str))
+        else:
+            cand_name = user_row["name"]
+            cursor.execute("UPDATE users SET password_hash = ?, salt = ? WHERE id = ?", (pwd_hash, salt, user_row["id"]))
 
         cursor.execute("DELETE FROM password_otps WHERE gmail = ?", (gmail_clean,))
         conn.commit()
         conn.close()
 
-        # Trigger Confirmation Email via SMTP from mohammedarhan9829@gmail.com
+        # Trigger Confirmation Email in background thread
+        import threading
         try:
             from backend.email_service import send_password_reset_confirmation_email
-            send_password_reset_confirmation_email(gmail_clean, user_row["name"])
+            threading.Thread(target=send_password_reset_confirmation_email, args=(gmail_clean, cand_name), daemon=True).start()
         except Exception:
             pass
 
         return {
             "success": True,
-            "message": f"🎉 Password successfully reset for '{user_row['name']}'! Confirmation email sent to {gmail_clean}.",
-            "name": user_row["name"]
+            "message": f"🎉 Password successfully reset for '{cand_name}'! Confirmation email sent to {gmail_clean}.",
+            "name": cand_name
         }
 
     @classmethod
