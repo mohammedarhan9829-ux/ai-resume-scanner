@@ -2,7 +2,7 @@ import os
 import socket
 import logging
 from typing import Optional, List, Dict, Any
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Header, Depends, Response, Query
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Header, Depends, Response, Query, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
@@ -383,9 +383,24 @@ def forgot_password(data: ForgotPasswordSchema):
 
 
 @app.post("/api/auth/send-otp")
-def send_otp(data: SendOtpSchema):
+def send_otp(data: SendOtpSchema, background_tasks: BackgroundTasks):
     try:
         result = UserManager.request_password_otp(data.gmail)
+        from backend.email_service import send_otp_email
+        from backend.database import get_db_connection
+        
+        gmail_clean = data.gmail.strip().lower()
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT otp_code FROM password_otps WHERE gmail = ?", (gmail_clean,))
+        otp_row = cursor.fetchone()
+        conn.close()
+        
+        if otp_row:
+            otp_code = otp_row["otp_code"]
+            cand_name = result.get("name", "Candidate")
+            background_tasks.add_task(send_otp_email, gmail_clean, otp_code, cand_name)
+            
         return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -119,7 +119,7 @@ class UserManager:
         import threading
         try:
             from backend.email_service import send_welcome_email
-            threading.Thread(target=send_welcome_email, args=(email_clean, name.strip()), daemon=True).start()
+            threading.Thread(target=send_welcome_email, args=(email_clean, name.strip()), daemon=False).start()
         except Exception:
             pass
 
@@ -181,8 +181,8 @@ class UserManager:
         import threading
         try:
             from backend.email_service import send_welcome_email, send_password_reset_confirmation_email
-            threading.Thread(target=send_welcome_email, args=(gmail_clean, cand_name), daemon=True).start()
-            threading.Thread(target=send_password_reset_confirmation_email, args=(gmail_clean, cand_name), daemon=True).start()
+            threading.Thread(target=send_welcome_email, args=(gmail_clean, cand_name), daemon=False).start()
+            threading.Thread(target=send_password_reset_confirmation_email, args=(gmail_clean, cand_name), daemon=False).start()
         except Exception:
             pass
 
@@ -233,7 +233,7 @@ class UserManager:
         import threading
         try:
             from backend.email_service import send_otp_email
-            threading.Thread(target=send_otp_email, args=(gmail_clean, otp_code, cand_name), daemon=True).start()
+            threading.Thread(target=send_otp_email, args=(gmail_clean, otp_code, cand_name), daemon=False).start()
             email_sent = True
         except Exception as err:
             logger.error(f"Failed to launch OTP email thread for {gmail_clean}: {err}")
@@ -302,7 +302,7 @@ class UserManager:
         import threading
         try:
             from backend.email_service import send_password_reset_confirmation_email
-            threading.Thread(target=send_password_reset_confirmation_email, args=(gmail_clean, cand_name), daemon=True).start()
+            threading.Thread(target=send_password_reset_confirmation_email, args=(gmail_clean, cand_name), daemon=False).start()
         except Exception:
             pass
 
@@ -337,7 +337,7 @@ class UserManager:
         import threading
         try:
             from backend.email_service import send_login_notification_email
-            threading.Thread(target=send_login_notification_email, args=(user_row["email"], user_row["name"]), daemon=True).start()
+            threading.Thread(target=send_login_notification_email, args=(user_row["email"], user_row["name"]), daemon=False).start()
         except Exception:
             pass
 
