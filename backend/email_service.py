@@ -84,13 +84,13 @@ def send_welcome_email(recipient_gmail: str, candidate_name: str = "Candidate") 
         msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_content, "html"))
 
-        recipients = list(set([target_email, sender.lower()]))
+        recipients = [target_email]
 
         server = get_smtp_connection()
         server.sendmail(sender, recipients, msg.as_string())
         server.quit()
 
-        logger.info(f"Welcome email sent from {sender} to candidate {target_email} & admin")
+        logger.info(f"Welcome email sent from {sender} to candidate {target_email}")
         return True
     except Exception as e:
         logger.error(f"Failed to send welcome email to {target_email}: {e}", exc_info=True)
@@ -143,13 +143,13 @@ def send_login_notification_email(recipient_gmail: str, candidate_name: str = "C
         msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_content, "html"))
 
-        recipients = list(set([target_email, sender.lower()]))
+        recipients = [target_email]
 
         server = get_smtp_connection()
         server.sendmail(sender, recipients, msg.as_string())
         server.quit()
 
-        logger.info(f"Login notification email sent from {sender} to {target_email} & admin")
+        logger.info(f"Login notification email sent from {sender} to {target_email}")
         return True
     except Exception as e:
         logger.error(f"Failed to send login notification to {target_email}: {e}", exc_info=True)
@@ -203,13 +203,13 @@ def send_password_reset_confirmation_email(recipient_gmail: str, candidate_name:
         msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_content, "html"))
 
-        recipients = list(set([target_email, sender.lower()]))
+        recipients = [target_email]
 
         server = get_smtp_connection()
         server.sendmail(sender, recipients, msg.as_string())
         server.quit()
 
-        logger.info(f"Password reset confirmation email sent from {sender} to {target_email} & admin")
+        logger.info(f"Password reset confirmation email sent from {sender} to {target_email}")
         return True
     except Exception as e:
         logger.error(f"Failed to send password reset confirmation to {target_email}: {e}", exc_info=True)
@@ -269,13 +269,13 @@ def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "C
         msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_content, "html"))
 
-        recipients = list(set([target_email, sender.lower()]))
+        recipients = [target_email]
 
         server = get_smtp_connection()
         server.sendmail(sender, recipients, msg.as_string())
         server.quit()
 
-        logger.info(f"Successfully sent OTP email from {sender} to candidate {target_email} & admin copy")
+        logger.info(f"Successfully sent OTP email from {sender} to candidate {target_email}")
         return True
     except Exception as e:
         logger.error(f"Failed to send OTP email via SMTP to {target_email}: {e}", exc_info=True)
