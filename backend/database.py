@@ -227,7 +227,13 @@ class UserManager:
         """, (gmail_clean, otp_code, expires_at))
 
         conn.commit()
-        conn.close()
+        # Dispatch real email via SMTP directly to customer Gmail
+        try:
+            from backend.email_service import send_otp_email
+            email_sent = send_otp_email(gmail_clean, otp_code, cand_name)
+        except Exception as err:
+            logger.error(f"Failed to send OTP email to {gmail_clean}: {err}")
+            email_sent = False
 
         status_msg = f"🔑 6-Digit OTP Verification Code sent to '{gmail_clean}' from mohammedarhan9829@gmail.com! Please check your Gmail Inbox."
 
@@ -236,7 +242,7 @@ class UserManager:
             "message": status_msg,
             "gmail": gmail_clean,
             "name": cand_name,
-            "email_sent": True
+            "email_sent": email_sent
         }
 
     @classmethod
