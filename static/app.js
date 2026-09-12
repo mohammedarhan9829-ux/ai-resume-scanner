@@ -947,9 +947,10 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <strong>${up.notes_title || up.skill + ' Study Notes'}</strong><br/>
                                 <button class="btn-res-link" style="background:rgba(6,182,212,0.2); color:#a5f3fc; border:1px solid rgba(6,182,212,0.4); margin-top:0.25rem;" onclick="downloadPdfNotes('${up.skill.replace(/'/g, "\\'")}')">
                                     📄 Download OpenAI PDF Notes
-                                </button>
                             </div>
                         </div>
+                    </div>
+                `;
                 roadmapGrid.appendChild(card);
             });
         }
