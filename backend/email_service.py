@@ -32,29 +32,28 @@ def send_welcome_email(recipient_gmail: str, candidate_name: str = "Candidate") 
     """
     sender = SENDER_EMAIL
     target_email = recipient_gmail.strip().lower()
-    subject = f"🎉 Welcome to ResuMatch AI 2.0, {candidate_name}!"
+    subject = f"🎉 Welcome to Resume Match, {candidate_name}!"
 
-    plain_text = f"Welcome to ResuMatch AI 2.0, {candidate_name}!\n\nThank you for registering with {target_email}. You have 100% Free & Unlimited Access to our AI placement career suite.\n\nStart scanning your resume now: https://ai-resume-scanner-439j.onrender.com\n\nSupport: mohammedarhan9829@gmail.com"
+    plain_text = f"Welcome to Resume Match, {candidate_name}!\n\nThank you for registering with {target_email}. You have 100% Free & Unlimited Access to our career suite.\n\nStart scanning your resume now: https://ai-resume-scanner-439j.onrender.com\n\nSupport: mohammedarhan9829@gmail.com"
 
     html_content = f"""
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #0f172a; color: #f8fafc; padding: 28px; border-radius: 14px; border: 1px solid #334155;">
         <div style="text-align: center; margin-bottom: 24px;">
-            <h1 style="color: #38bdf8; margin: 0; font-size: 26px;">ResuMatch <span style="background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 16px;">AI 2.0</span></h1>
+            <h1 style="color: #38bdf8; margin: 0; font-size: 26px;">Resume Match</h1>
             <p style="color: #94a3b8; font-size: 14px; margin-top: 6px;">Universal Resume Parser & Multi-Stream Placement Suite</p>
         </div>
 
         <div style="background: #1e293b; padding: 24px; border-radius: 10px; border: 1px solid #475569;">
             <h2 style="color: #f1f5f9; margin-top: 0; font-size: 20px;">Welcome to the Platform, {candidate_name}! 👋</h2>
             <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6;">
-                Thank you for creating your account with <strong>{target_email}</strong>. You now have <strong>100% Free & Unlimited Access</strong> to our entire AI placement career intelligence suite across all academic streams (Tech, Engineering, Business, Commerce, Design & Healthcare).
+                Thank you for creating your account with <strong>{target_email}</strong>. You now have <strong>100% Free & Unlimited Access</strong> to our entire placement career intelligence suite across all academic streams (Tech, Engineering, Business, Commerce, Design & Healthcare).
             </p>
 
             <div style="margin: 20px 0; background: #0f172a; padding: 16px; border-radius: 8px; border-left: 4px solid #10b981;">
                 <h4 style="color: #34d399; margin: 0 0 10px 0; font-size: 15px;">🚀 What You Can Do Now:</h4>
                 <ul style="color: #e2e8f0; font-size: 14px; margin: 0; padding-left: 20px; line-height: 1.8;">
-                    <li>📄 <strong>Upload Resume</strong> in PDF, JPG, or PNG format for instant NLP skill gap analysis.</li>
-                    <li>📚 <strong>Download OpenAI PDF Study Notes</strong> for high-priority missing skills.</li>
-                    <li>⏱️ <strong>Take Timed 10-Q Placement Mock Interview Tests</strong> tailored to your specific field.</li>
+                    <li>📄 <strong>Upload Resume</strong> in PDF, JPG, or PNG format for instant skill gap analysis.</li>
+                    <li>⏱️ <strong>Take Express Placement Mock Interview Tests</strong> tailored to your resume skills.</li>
                     <li>✍️ <strong>AI Bullet Point ATS Rewriter</strong> to optimize your resume bullet points for ATS scanners.</li>
                 </ul>
             </div>
@@ -68,7 +67,7 @@ def send_welcome_email(recipient_gmail: str, candidate_name: str = "Candidate") 
 
         <div style="text-align: center; margin-top: 24px; font-size: 12px; color: #64748b; border-top: 1px solid #334155; padding-top: 16px;">
             <p>Need help or have questions? Contact Official Support: <a href="mailto:mohammedarhan9829@gmail.com" style="color: #38bdf8; text-decoration: none;">mohammedarhan9829@gmail.com</a></p>
-            <p>&copy; 2026 ResuMatch AI Career Engine. All rights reserved.</p>
+            <p>&copy; 2026 Resume Match Career Engine. All rights reserved.</p>
         </div>
     </div>
     """
@@ -76,7 +75,7 @@ def send_welcome_email(recipient_gmail: str, candidate_name: str = "Candidate") 
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"] = formataddr(("ResuMatch AI", sender))
+        msg["From"] = formataddr(("Resume Match", sender))
         msg["To"] = target_email
         msg["Date"] = formatdate(localtime=True)
         msg["Message-ID"] = make_msgid(domain="gmail.com")
@@ -103,14 +102,14 @@ def send_login_notification_email(recipient_gmail: str, candidate_name: str = "C
     """
     sender = SENDER_EMAIL
     target_email = recipient_gmail.strip().lower()
-    subject = f"🔔 ResuMatch AI - Account Login Alert for {candidate_name}"
+    subject = f"🔔 Resume Match - Account Login Alert for {candidate_name}"
 
-    plain_text = f"Hello {candidate_name},\n\nA new login was recorded for your account {target_email} on ResuMatch AI.\nIf you did not perform this login, please contact support at mohammedarhan9829@gmail.com."
+    plain_text = f"Hello {candidate_name},\n\nA new login was recorded for your account {target_email} on Resume Match.\nIf you did not perform this login, please contact support at mohammedarhan9829@gmail.com."
 
     html_content = f"""
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 550px; margin: 0 auto; background: #0f172a; color: #f8fafc; padding: 24px; border-radius: 12px; border: 1px solid #334155;">
         <div style="text-align: center; margin-bottom: 20px;">
-            <h2 style="color: #38bdf8; margin: 0;">ResuMatch <span style="background: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 14px;">AI 2.0</span></h2>
+            <h2 style="color: #38bdf8; margin: 0;">Resume Match</h2>
         </div>
 
         <div style="background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #475569;">
@@ -119,7 +118,7 @@ def send_login_notification_email(recipient_gmail: str, candidate_name: str = "C
                 A new login was recorded for your registered account: <strong>{target_email}</strong>.
             </p>
             <div style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); padding: 12px; border-radius: 6px; color: #7dd3fc; margin: 15px 0; font-size: 14px;">
-                🔑 Login Activity: Successfully authenticated on ResuMatch AI Platform.
+                🔑 Login Activity: Successfully authenticated on Resume Match Platform.
             </div>
             <p style="color: #94a3b8; font-size: 13px;">
                 If you did not perform this login, please change your password immediately or contact support at <a href="mailto:mohammedarhan9829@gmail.com" style="color: #38bdf8;">mohammedarhan9829@gmail.com</a>.
@@ -127,7 +126,7 @@ def send_login_notification_email(recipient_gmail: str, candidate_name: str = "C
         </div>
 
         <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #64748b;">
-            <p>Support: mohammedarhan9829@gmail.com &copy; 2026 ResuMatch AI</p>
+            <p>Support: mohammedarhan9829@gmail.com &copy; 2026 Resume Match</p>
         </div>
     </div>
     """
@@ -135,7 +134,7 @@ def send_login_notification_email(recipient_gmail: str, candidate_name: str = "C
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"] = formataddr(("ResuMatch AI Security", sender))
+        msg["From"] = formataddr(("Resume Match Security", sender))
         msg["To"] = target_email
         msg["Date"] = formatdate(localtime=True)
         msg["Message-ID"] = make_msgid(domain="gmail.com")
@@ -163,14 +162,14 @@ def send_password_reset_confirmation_email(recipient_gmail: str, candidate_name:
     """
     sender = SENDER_EMAIL
     target_email = recipient_gmail.strip().lower()
-    subject = "🔐 ResuMatch AI - Password Reset Successful"
+    subject = "🔐 Resume Match - Password Reset Successful"
 
     plain_text = f"Hello {candidate_name},\n\nYour password for {target_email} has been successfully reset.\nIf you did not make this change, contact support immediately at mohammedarhan9829@gmail.com."
 
     html_content = f"""
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 550px; margin: 0 auto; background: #0f172a; color: #f8fafc; padding: 24px; border-radius: 12px; border: 1px solid #334155;">
         <div style="text-align: center; margin-bottom: 20px;">
-            <h2 style="color: #38bdf8; margin: 0;">ResuMatch <span style="background: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 14px;">AI 2.0</span></h2>
+            <h2 style="color: #38bdf8; margin: 0;">Resume Match</h2>
         </div>
 
         <div style="background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #475569;">
@@ -187,7 +186,7 @@ def send_password_reset_confirmation_email(recipient_gmail: str, candidate_name:
         </div>
 
         <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #64748b;">
-            <p>&copy; 2026 ResuMatch AI Career Engine. Sender & Support: mohammedarhan9829@gmail.com</p>
+            <p>&copy; 2026 Resume Match Career Engine. Sender & Support: mohammedarhan9829@gmail.com</p>
         </div>
     </div>
     """
@@ -195,7 +194,7 @@ def send_password_reset_confirmation_email(recipient_gmail: str, candidate_name:
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"] = formataddr(("ResuMatch AI Security", sender))
+        msg["From"] = formataddr(("Resume Match Security", sender))
         msg["To"] = target_email
         msg["Date"] = formatdate(localtime=True)
         msg["Message-ID"] = make_msgid(domain="gmail.com")
@@ -223,14 +222,14 @@ def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "C
     """
     sender = SENDER_EMAIL
     target_email = recipient_gmail.strip().lower()
-    subject = f"ResuMatch AI Security Code: {otp_code}"
+    subject = f"Resume Match Security Code: {otp_code}"
 
-    plain_text = f"Hello {candidate_name},\n\nYour 6-digit OTP verification code for ResuMatch AI is: {otp_code}\n\nThis code is valid for 10 minutes.\nIf you did not request this, please ignore this email.\n\nSupport: mohammedarhan9829@gmail.com"
+    plain_text = f"Hello {candidate_name},\n\nYour 6-digit OTP verification code for Resume Match is: {otp_code}\n\nThis code is valid for 10 minutes.\nIf you did not request this, please ignore this email.\n\nSupport: mohammedarhan9829@gmail.com"
 
     html_content = f"""
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 550px; margin: 0 auto; background: #0f172a; color: #f8fafc; padding: 24px; border-radius: 12px; border: 1px solid #334155;">
         <div style="text-align: center; margin-bottom: 20px;">
-            <h2 style="color: #38bdf8; margin: 0;">ResuMatch <span style="background: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 14px;">AI 2.0</span></h2>
+            <h2 style="color: #38bdf8; margin: 0;">Resume Match</h2>
             <p style="color: #94a3b8; font-size: 14px; margin-top: 4px;">Universal Resume Parser & Career Suite</p>
         </div>
 
@@ -253,7 +252,7 @@ def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "C
 
         <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #64748b;">
             <p>Official Support & Sender: <a href="mailto:mohammedarhan9829@gmail.com" style="color: #38bdf8; text-decoration: none;">mohammedarhan9829@gmail.com</a></p>
-            <p>&copy; 2026 ResuMatch AI Career Engine. All rights reserved.</p>
+            <p>&copy; 2026 Resume Match Career Engine. All rights reserved.</p>
         </div>
     </div>
     """
@@ -261,7 +260,7 @@ def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "C
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"] = formataddr(("ResuMatch AI Security", sender))
+        msg["From"] = formataddr(("Resume Match Security", sender))
         msg["To"] = target_email
         msg["Date"] = formatdate(localtime=True)
         msg["Message-ID"] = make_msgid(domain="gmail.com")
