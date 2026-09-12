@@ -382,13 +382,6 @@ def download_skill_notes(
     domain: Optional[str] = Query("General Tech & Engineering"),
     authorization: Optional[str] = Header(None)
 ):
-    user = get_current_user(authorization)
-    if not user or not user.get("is_pro", False):
-        raise HTTPException(
-            status_code=403, 
-            detail="⚠️ OpenAI PDF Study Notes are a Pro Feature (₹150/month). Please upgrade to download!"
-        )
-
     try:
         pdf_bytes = generate_notes_pdf(skill_name, domain=domain)
         safe_filename = skill_name.replace(" ", "_").replace("/", "_") + "_OpenAI_Study_Notes.pdf"
@@ -454,12 +447,7 @@ async def scan_resume(
     user = get_current_user(authorization)
     user_id = user["id"] if user else None
 
-    allowed = UserManager.check_and_increment_scan(user_id)
-    if not allowed:
-        raise HTTPException(
-            status_code=429,
-            detail="⚠️ Free Tier Limit Reached (3 Scans / Day). Upgrade to Pro Plan for ₹150/month for UNLIMITED scans and AI Features!"
-        )
+    UserManager.check_and_increment_scan(user_id)
 
     filename = file.filename
     ext = os.path.splitext(filename)[1].lower()

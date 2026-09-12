@@ -49,13 +49,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnSubmitTest = document.getElementById("btnSubmitTest");
     const testEvalResultsContainer = document.getElementById("testEvalResultsContainer");
 
-    // Auth & Subscription DOM Elements
+    // Auth DOM Elements
     const btnNavAuth = document.getElementById("btnNavAuth");
     const userProfileBadge = document.getElementById("userProfileBadge");
     const userNameNav = document.getElementById("userNameNav");
     const userPlanNav = document.getElementById("userPlanNav");
     const userAvatar = document.getElementById("userAvatar");
-    const btnNavUpgrade = document.getElementById("btnNavUpgrade");
     const btnOpenProfile = document.getElementById("btnOpenProfile");
 
     // Modals
@@ -66,10 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const formLogin = document.getElementById("formLogin");
     const formRegister = document.getElementById("formRegister");
 
-    const pricingModal = document.getElementById("pricingModal");
-    const btnClosePricingModal = document.getElementById("btnClosePricingModal");
-    const btnConfirmUpgrade = document.getElementById("btnConfirmUpgrade");
-
     const profileModal = document.getElementById("profileModal");
     const btnCloseProfileModal = document.getElementById("btnCloseProfileModal");
     const profileNameLg = document.getElementById("profileNameLg");
@@ -79,7 +74,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const profDailyScans = document.getElementById("profDailyScans");
     const profPlanStatus = document.getElementById("profPlanStatus");
     const historyList = document.getElementById("historyList");
-    const btnProfileUpgrade = document.getElementById("btnProfileUpgrade");
     const btnLogout = document.getElementById("btnLogout");
 
     let selectedFile = null;
@@ -143,20 +137,16 @@ document.addEventListener("DOMContentLoaded", () => {
             userProfileBadge.classList.remove("hidden");
             userNameNav.textContent = user.name;
             userAvatar.textContent = user.name.charAt(0).toUpperCase();
-
-            if (user.is_pro) {
-                userPlanNav.textContent = "PRO 👑";
+            if (userPlanNav) {
+                userPlanNav.textContent = "UNLOCKED ✨";
                 userPlanNav.className = "user-plan-tag pro-tag";
-                scanLimitBadge.textContent = "Pro Tier: Unlimited Scans 👑";
-            } else {
-                userPlanNav.textContent = "FREE";
-                userPlanNav.className = "user-plan-tag free-tag";
-                scanLimitBadge.textContent = `Free Scans: ${user.scans_remaining}/3 Left Today`;
             }
         } else {
             btnNavAuth.classList.remove("hidden");
             userProfileBadge.classList.add("hidden");
-            scanLimitBadge.textContent = "Guest Daily Scans: 3/3 Left";
+        }
+        if (scanLimitBadge) {
+            scanLimitBadge.innerHTML = '<i class="fa-solid fa-bolt text-emerald"></i> 100% Free & Unlimited Access';
         }
     }
 
@@ -164,17 +154,8 @@ document.addEventListener("DOMContentLoaded", () => {
     btnNavAuth.addEventListener("click", () => authModal.classList.remove("hidden"));
     btnCloseAuthModal.addEventListener("click", () => authModal.classList.add("hidden"));
 
-    btnNavUpgrade.addEventListener("click", () => pricingModal.classList.remove("hidden"));
-    btnClosePricingModal.addEventListener("click", () => pricingModal.classList.add("hidden"));
-
     btnOpenProfile.addEventListener("click", () => openProfileModal());
     btnCloseProfileModal.addEventListener("click", () => profileModal.classList.add("hidden"));
-    if (btnProfileUpgrade) {
-        btnProfileUpgrade.addEventListener("click", () => {
-            profileModal.classList.add("hidden");
-            pricingModal.classList.remove("hidden");
-        });
-    }
 
     tabLogin.addEventListener("click", () => {
         tabLogin.classList.add("active");
@@ -237,33 +218,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    btnConfirmUpgrade.addEventListener("click", async () => {
-        if (!currentUser) {
-            pricingModal.classList.add("hidden");
-            authModal.classList.remove("hidden");
-            alert("Please log in or create an account first to upgrade to Pro Plan.");
-            return;
-        }
-        try {
-            const res = await fetch("/api/subscription/upgrade", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${authToken}`
-                },
-                body: JSON.stringify({ plan: "pro", payment_ref: "SIMULATED_UPI_SUCCESS_150" })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.detail || "Upgrade failed.");
-            currentUser = data.user;
-            updateAuthUI(currentUser);
-            pricingModal.classList.add("hidden");
-            alert(data.message);
-        } catch (err) {
-            alert(`Upgrade Error: ${err.message}`);
-        }
-    });
-
     btnLogout.addEventListener("click", () => {
         localStorage.removeItem("user_token");
         authToken = "";
@@ -279,17 +233,10 @@ document.addEventListener("DOMContentLoaded", () => {
         profileEmailSub.textContent = currentUser.email;
         profileAvatarLg.textContent = currentUser.name.charAt(0).toUpperCase();
 
-        if (currentUser.is_pro) {
-            profilePlanTag.textContent = "PRO SUBSCRIPTION 👑";
-            profilePlanTag.className = "user-plan-tag pro-tag";
-            profDailyScans.textContent = "Unlimited 👑";
-            profPlanStatus.textContent = "Active Pro (₹150/mo)";
-        } else {
-            profilePlanTag.textContent = "FREE PLAN";
-            profilePlanTag.className = "user-plan-tag free-tag";
-            profDailyScans.textContent = `${currentUser.scans_remaining}/3 Left`;
-            profPlanStatus.textContent = "Free Tier";
-        }
+        profilePlanTag.textContent = "100% UNLOCKED ✨";
+        profilePlanTag.className = "user-plan-tag pro-tag";
+        profDailyScans.textContent = "Unlimited Free ✨";
+        profPlanStatus.textContent = "Full Access";
 
         historyList.innerHTML = `<p class="text-muted">Loading scan history...</p>`;
         profileModal.classList.remove("hidden");
@@ -561,26 +508,15 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // PDF Notes Download Helper
+    // PDF Notes Download Helper - 100% Free for Everyone
     window.downloadPdfNotes = async function(skillName) {
-        if (!authToken) {
-            authModal.classList.remove("hidden");
-            alert("Please log in or create an account to download PDF Study Notes.");
-            return;
-        }
-
         try {
-            const res = await fetch(`/api/notes/download/${encodeURIComponent(skillName)}`, {
-                headers: { "Authorization": `Bearer ${authToken}` }
-            });
+            const headers = authToken ? { "Authorization": `Bearer ${authToken}` } : {};
+            const res = await fetch(`/api/notes/download/${encodeURIComponent(skillName)}`, { headers });
 
             if (!res.ok) {
-                if (res.status === 403) {
-                    pricingModal.classList.remove("hidden");
-                    alert("⚠️ PDF Study Notes are an exclusive Pro Feature (₹150/month). Upgrade to download!");
-                    return;
-                }
-                throw new Error("Failed to download PDF notes.");
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.detail || "Failed to download PDF notes.");
             }
 
             const blob = await res.blob();
@@ -883,49 +819,28 @@ document.addEventListener("DOMContentLoaded", () => {
                 const card = document.createElement("div");
                 card.className = "roadmap-item";
 
-                if (isPro) {
-                    card.innerHTML = `
-                        <div class="roadmap-skill"><i class="fa-solid fa-crown text-amber"></i> ${up.skill} <span class="pro-resource-badge">PRO KIT</span></div>
-                        <div class="roadmap-desc" style="margin-bottom:0.75rem;">${up.suggestion}</div>
-                        
-                        <div class="pro-resources-box">
-                            <div class="res-item">
-                                <i class="fa-brands fa-youtube text-rose"></i>
-                                <div>
-                                    <strong>${up.video_title || up.skill + ' Video Course'}</strong><br/>
-                                    <a href="${up.video_url}" target="_blank" class="btn-res-link">📺 Watch Video Course</a>
-                                </div>
-                            </div>
-                            <div class="res-item">
-                                <i class="fa-solid fa-file-pdf text-cyan"></i>
-                                <div>
-                                    <strong>${up.notes_title || up.skill + ' Study Notes'}</strong><br/>
-                                    <button class="btn-res-link" style="background:rgba(6,182,212,0.2); color:#a5f3fc; border:1px solid rgba(6,182,212,0.4); margin-top:0.25rem;" onclick="downloadPdfNotes('${up.skill.replace(/'/g, "\\'")}')">
-                                        📄 Download OpenAI PDF Notes
-                                    </button>
-                                </div>
+                card.className = "roadmap-item";
+                card.innerHTML = `
+                    <div class="roadmap-skill"><i class="fa-solid fa-lightbulb text-amber"></i> ${up.skill} <span class="pro-resource-badge" style="background:rgba(16,185,129,0.2); color:#a7f3d0; border:1px solid rgba(16,185,129,0.4);">FREE KIT</span></div>
+                    <div class="roadmap-desc" style="margin-bottom:0.75rem;">${up.suggestion}</div>
+                    
+                    <div class="pro-resources-box">
+                        <div class="res-item">
+                            <i class="fa-brands fa-youtube text-rose"></i>
+                            <div>
+                                <strong>${up.video_title || up.skill + ' Video Course'}</strong><br/>
+                                <a href="${up.video_url}" target="_blank" class="btn-res-link">📺 Watch Video Course</a>
                             </div>
                         </div>
-                    `;
-                } else {
-                    card.innerHTML = `
-                        <div class="roadmap-skill"><i class="fa-solid fa-lightbulb text-amber"></i> ${up.skill}</div>
-                        <div class="roadmap-desc" style="margin-bottom:0.75rem;">${up.suggestion}</div>
-                        
-                        <div class="locked-pro-box">
-                            <div class="locked-text">
-                                <i class="fa-solid fa-lock text-amber"></i> 
-                                <span><strong>OpenAI PDF Notes & Video Masterclass Locked</strong></span>
+                        <div class="res-item">
+                            <i class="fa-solid fa-file-pdf text-cyan"></i>
+                            <div>
+                                <strong>${up.notes_title || up.skill + ' Study Notes'}</strong><br/>
+                                <button class="btn-res-link" style="background:rgba(6,182,212,0.2); color:#a5f3fc; border:1px solid rgba(6,182,212,0.4); margin-top:0.25rem;" onclick="downloadPdfNotes('${up.skill.replace(/'/g, "\\'")}')">
+                                    📄 Download OpenAI PDF Notes
+                                </button>
                             </div>
-                            <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.6rem;">
-                                Upgrade to Pro (₹150/mo) to unlock Multi-Page OpenAI Study Masterclasses for ${up.skill}.
-                            </p>
-                            <button class="btn-unlock-skill-pro" onclick="document.getElementById('pricingModal').classList.remove('hidden')">
-                                👑 Unlock OpenAI PDF Notes (₹150/mo)
-                            </button>
                         </div>
-                    `;
-                }
                 roadmapGrid.appendChild(card);
             });
         }

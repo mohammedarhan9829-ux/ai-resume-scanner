@@ -192,47 +192,41 @@ class UserManager:
         if row.get("last_scan_date") != today_str:
             scans_today = 0
 
-        plan = row.get("subscription_plan", "free")
-        is_pro = (plan == "pro")
+        plan = "unlimited"
+        is_pro = True
 
         return {
             "id": row["id"],
             "name": row["name"],
             "email": row["email"],
             "subscription_plan": plan,
-            "is_pro": is_pro,
+            "is_pro": True,
             "scans_today": scans_today,
-            "daily_scan_limit": 999999 if is_pro else 3,
-            "scans_remaining": 999999 if is_pro else max(0, 3 - scans_today),
+            "daily_scan_limit": 999999,
+            "scans_remaining": 999999,
             "created_at": row.get("created_at")
         }
 
     @classmethod
     def check_and_increment_scan(cls, user_id: Optional[int]) -> bool:
-        """Check daily scan limits for user and increment scan count if allowed."""
+        """All scans are 100% free and unlimited for all users."""
         if not user_id:
-            # Anonymous guests get 3 scans per session
             return True
 
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT subscription_plan, scans_today, last_scan_date FROM users WHERE id = ?", (user_id,))
+        cursor.execute("SELECT scans_today, last_scan_date FROM users WHERE id = ?", (user_id,))
         row = cursor.fetchone()
         if not row:
             conn.close()
             return True
 
         today_str = date.today().isoformat()
-        plan = row["subscription_plan"]
         scans_today = row["scans_today"]
         last_date = row["last_scan_date"]
 
         if last_date != today_str:
             scans_today = 0
-
-        if plan != "pro" and scans_today >= 3:
-            conn.close()
-            return False  # Free limit reached!
 
         cursor.execute("""
             UPDATE users SET scans_today = ?, last_scan_date = ? WHERE id = ?

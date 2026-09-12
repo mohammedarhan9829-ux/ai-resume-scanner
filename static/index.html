@@ -28,11 +28,6 @@
 
             <!-- Navbar Actions -->
             <div class="nav-right-actions">
-                <!-- Upgrade Pro Button -->
-                <button class="btn-upgrade-nav" id="btnNavUpgrade">
-                    <i class="fa-solid fa-crown text-amber"></i> Go Pro <span class="price-pill">₹150/mo</span>
-                </button>
-
                 <!-- LAN IP Badge -->
                 <div class="network-badge" id="networkBadge" title="Click to copy Wi-Fi access link for phone/laptop">
                     <i class="fa-solid fa-wifi"></i>
@@ -52,7 +47,6 @@
                         <div class="avatar-circle" id="userAvatar">U</div>
                         <div class="user-info-text">
                             <span class="user-name-display" id="userNameNav">User</span>
-                            <span class="user-plan-tag free-tag" id="userPlanNav">FREE</span>
                         </div>
                         <button class="btn-icon-sm" id="btnOpenProfile" title="View Profile & History"><i class="fa-solid fa-bars"></i></button>
                     </div>
@@ -79,7 +73,7 @@
             <div class="card upload-card">
                 <div class="card-header-flex">
                     <h2 class="card-title"><i class="fa-solid fa-file-arrow-up"></i> Upload Resume</h2>
-                    <span class="scan-limit-badge" id="scanLimitBadge">Daily Free Scans: 3/3 Left</span>
+                    <span class="scan-limit-badge" id="scanLimitBadge" style="background:rgba(16,185,129,0.15); color:#a7f3d0; border:1px solid rgba(16,185,129,0.3);"><i class="fa-solid fa-bolt text-emerald"></i> 100% Free & Unlimited Access</span>
                 </div>
                 
                 <!-- Target Job Domain Selector -->
@@ -419,55 +413,7 @@
         </div>
     </div>
 
-    <!-- MODAL 2: PRICING / SUBSCRIPTION MODAL -->
-    <div class="modal-overlay hidden" id="pricingModal">
-        <div class="modal-card pricing-modal-card">
-            <button class="btn-close-modal" id="btnClosePricingModal"><i class="fa-solid fa-xmark"></i></button>
-            <div class="text-center">
-                <h2 class="modal-heading">Choose Your Tier Plan</h2>
-                <p class="modal-sub">Unlock Unlimited Daily Scans, OpenAI PDF Notes & Timed Placement Mock Tests</p>
-            </div>
-
-            <div class="pricing-cards-grid">
-                <!-- Free Tier -->
-                <div class="plan-card free-plan-card">
-                    <div class="plan-header">
-                        <h3>Free Starter</h3>
-                        <div class="plan-price">₹0 <span>/ month</span></div>
-                    </div>
-                    <ul class="plan-features">
-                        <li><i class="fa-solid fa-check text-emerald"></i> 3 Resume Scans / Day</li>
-                        <li><i class="fa-solid fa-check text-emerald"></i> Skill Extraction across 10 Streams</li>
-                        <li><i class="fa-solid fa-check text-emerald"></i> Basic Skill Gap Analysis</li>
-                        <li><i class="fa-solid fa-xmark text-rose"></i> ❌ OpenAI PDF Study Notes Locked</li>
-                        <li><i class="fa-solid fa-xmark text-rose"></i> ❌ Timed Mock Interview Evaluator Locked</li>
-                    </ul>
-                    <button class="btn-plan-action current-plan-btn" disabled>Current Tier</button>
-                </div>
-
-                <!-- Pro Tier (₹150/month) -->
-                <div class="plan-card pro-plan-card">
-                    <div class="pro-badge-top">BEST VALUE FOR PLACEMENTS</div>
-                    <div class="plan-header">
-                        <h3>Pro Ultimate</h3>
-                        <div class="plan-price">₹150 <span>/ month</span></div>
-                    </div>
-                    <ul class="plan-features">
-                        <li><i class="fa-solid fa-crown text-amber"></i> <strong>UNLIMITED</strong> Daily Resume Scans</li>
-                        <li><i class="fa-solid fa-check text-emerald"></i> Multi-Page OpenAI PDF Study Notes</li>
-                        <li><i class="fa-solid fa-check text-emerald"></i> AI Bullet Point ATS Rewriter</li>
-                        <li><i class="fa-solid fa-check text-emerald"></i> Timed 10-Q Placement Mock Test</li>
-                        <li><i class="fa-solid fa-check text-emerald"></i> Full ATS Compliance & Salary Analytics</li>
-                    </ul>
-                    <button class="btn-plan-action btn-upgrade-pro" id="btnConfirmUpgrade">
-                        👑 Upgrade Now for ₹150 / Month
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL 3: USER PROFILE & HISTORY MODAL -->
+    <!-- MODAL 2: USER PROFILE & HISTORY MODAL -->
     <div class="modal-overlay hidden" id="profileModal">
         <div class="modal-card profile-modal-card">
             <button class="btn-close-modal" id="btnCloseProfileModal"><i class="fa-solid fa-xmark"></i></button>
@@ -477,18 +423,18 @@
                 <div>
                     <h3 class="profile-name-lg" id="profileNameLg">User Name</h3>
                     <p class="profile-email-sub" id="profileEmailSub">user@example.com</p>
-                    <span class="user-plan-tag free-tag" id="profilePlanTag">FREE PLAN</span>
+                    <span class="user-plan-tag pro-tag" id="profilePlanTag">100% UNLOCKED</span>
                 </div>
             </div>
 
             <div class="profile-stats-row">
                 <div class="prof-stat-box">
-                    <span class="stat-num" id="profDailyScans">3/3 Left</span>
-                    <span class="stat-lbl">Daily Scans Remaining</span>
+                    <span class="stat-num" id="profDailyScans">Unlimited Free ✨</span>
+                    <span class="stat-lbl">Daily Resume Scans</span>
                 </div>
                 <div class="prof-stat-box">
-                    <span class="stat-num" id="profPlanStatus">Free Tier</span>
-                    <span class="stat-lbl">Subscription Status</span>
+                    <span class="stat-num" id="profPlanStatus">Full Access</span>
+                    <span class="stat-lbl">All AI Features</span>
                 </div>
             </div>
 
@@ -500,10 +446,7 @@
             </div>
 
             <div class="profile-footer-actions">
-                <button class="btn-modal-primary" id="btnProfileUpgrade" style="background:var(--gradient-pro); color:#000;">
-                    👑 Upgrade (₹150/mo)
-                </button>
-                <button class="btn-secondary" id="btnLogout">
+                <button class="btn-secondary" id="btnLogout" style="width:100%;">
                     <i class="fa-solid fa-right-from-bracket"></i> Log Out
                 </button>
             </div>
