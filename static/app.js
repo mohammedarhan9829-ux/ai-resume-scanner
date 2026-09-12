@@ -647,12 +647,16 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         data.evaluations.forEach(e => {
+            const isPlagiarism = e.feedback.includes("Plagiarism") || e.feedback.includes("🚨");
+            const matchColor = isPlagiarism || e.match_percentage === 0 ? "var(--accent-rose)" : (e.match_percentage >= 70 ? "var(--accent-emerald)" : "var(--accent-amber)");
+            const feedbackColor = isPlagiarism ? "#f43f5e" : "var(--accent-cyan)";
+
             const div = document.createElement("div");
             div.className = "eval-item";
             div.innerHTML = `
                 <div class="eval-q-header">
                     <span>Q${e.question_num}: ${e.question}</span>
-                    <span style="color:var(--accent-emerald); font-size:0.9rem;">${e.match_percentage}% Answer Match</span>
+                    <span style="color:${matchColor}; font-weight:700; font-size:0.9rem;">${e.match_percentage}% Answer Match ${isPlagiarism ? '⚠️ (Plagiarism Flagged)' : ''}</span>
                 </div>
                 
                 <div style="background:rgba(255,255,255,0.03); border-radius:var(--radius-sm); padding:0.6rem; margin-top:0.3rem;">
@@ -660,7 +664,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <p style="color:var(--text-secondary); margin-top:0.25rem;">"${e.user_answer}"</p>
                 </div>
 
-                <div style="color:var(--accent-cyan); font-size:0.82rem; margin-top:0.4rem;">
+                <div style="color:${feedbackColor}; font-size:0.85rem; margin-top:0.4rem; font-weight:${isPlagiarism ? '600' : '400'};">
                     <strong>AI Evaluation Feedback:</strong> ${e.feedback}
                 </div>
             `;

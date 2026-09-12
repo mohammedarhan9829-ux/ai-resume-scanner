@@ -214,9 +214,47 @@ Return ONLY a valid JSON list of 10 objects: [{"id": 1, "category": "Technical/S
     return {"success": True, "job_title": job_title, "questions": fallback_10}
 
 
+def detect_ai_or_web_copy(text: str) -> tuple[bool, str]:
+    """Detect if candidate answer is copied directly from Google AI Overview, ChatGPT, or web search URLs."""
+    if not text or not text.strip():
+        return False, ""
+
+    txt = text.strip()
+    txt_lower = txt.lower()
+
+    # 1. Google AI Overview Header or Hindi/Multi-lingual Overview text
+    if "ai overview" in txt_lower or "ai-generated" in txt_lower or "google search" in txt_lower:
+        return True, "🚨 Plagiarism Flagged: Answer copied directly from Google AI Overview / Search engine."
+
+    # 2. Web URLs or URL citations like [1] (https://...) or http://
+    import re
+    if re.search(r'\[\d+\]\s*\(\s*https?://', txt) or re.search(r'https?://[^\s]+\.(com|org|in|net|edu|io)', txt):
+        return True, "🚨 Plagiarism Flagged: Web search links or URL citations detected in answer ([1] https://...)."
+
+    # 3. Citation brackets like [1], [2], [3] (2 or more citation numbers)
+    citations = re.findall(r'\[\d+\]', txt)
+    if len(citations) >= 2:
+        return True, "🚨 Plagiarism Flagged: External web search citation markers [1], [2] detected."
+
+    # 4. Copy-pasted AI preamble phrases
+    ai_phrases = [
+        "as an ai language model",
+        "as an ai,",
+        "here is the direct breakdown",
+        "certainly! here is",
+        "sure! here is the difference",
+        "i am an ai"
+    ]
+    if any(p in txt_lower for p in ai_phrases):
+        return True, "🚨 Plagiarism Flagged: Copied AI generator preamble text detected."
+
+    return False, ""
+
+
 @app.post("/api/ai/live-interview/evaluate")
 def evaluate_10_interview_answers(data: LiveInterviewEvalSchema, authorization: Optional[str] = Header(None)):
-    """Evaluate candidate answers against AI model answers and calculate exact match percentage."""
+    """Evaluate candidate answers against AI model answers and calculate exact match percentage with plagiarism detection."""
+    import re
     total_q = len(data.answers)
     if total_q == 0:
         raise HTTPException(status_code=400, detail="No answers submitted for evaluation.")
@@ -235,7 +273,20 @@ def evaluate_10_interview_answers(data: LiveInterviewEvalSchema, authorization: 
                         "user_answer": "No answer provided.",
                         "match_percentage": 0,
                         "feedback": "⚠️ No answer provided. Practice explaining core technical mechanisms.",
-                        "ideal_answer": "A complete response should explain architectural principles, design patterns, and concrete tools."
+                        "ideal_answer": "A complete response should explain technical principles and concrete tools."
+                    })
+                    continue
+
+                # 1. Anti-Plagiarism / AI & Web Copy Check
+                is_copy, copy_reason = detect_ai_or_web_copy(ans.user_answer)
+                if is_copy:
+                    evaluations.append({
+                        "question_num": idx,
+                        "question": ans.question,
+                        "user_answer": ans.user_answer,
+                        "match_percentage": 0,
+                        "feedback": f"{copy_reason} Please write candidate responses in your own original words rather than copy-pasting from Google AI Overview or web search.",
+                        "ideal_answer": "Answers must be written directly by candidate without web/AI copy-pasting."
                     })
                     continue
 
@@ -243,6 +294,9 @@ def evaluate_10_interview_answers(data: LiveInterviewEvalSchema, authorization: 
 
 Question: "{ans.question}"
 Candidate Answer: "{ans.user_answer}"
+
+CRITICAL ANTI-PLAGIARISM REQUIREMENT:
+If the candidate answer appears to be copy-pasted directly from Google AI Overview or a website (e.g. contains URL links like 'https://...', 'AI Overview', or citation numbers '[1]'), flag it as plagiarized by setting match_percentage to 0 and providing feedback starting with '🚨 Plagiarism Flagged:'.
 
 Return ONLY a JSON object:
 {{
@@ -285,18 +339,56 @@ Return ONLY a JSON object:
         except Exception as e:
             logger.warning(f"OpenAI evaluation error: {e}")
 
-    # Fallback Evaluation Engine with Match %
+    # Fallback Evaluation Engine with Plagiarism Detection & Keyword Matching
     for idx, ans in enumerate(data.answers, 1):
-        words = len(ans.user_answer.strip().split())
-        score = min(95, max(30, words * 4)) if words > 0 else 0
+        if not ans.user_answer.strip():
+            evaluations.append({
+                "question_num": idx,
+                "question": ans.question,
+                "user_answer": "No answer provided.",
+                "match_percentage": 0,
+                "feedback": "⚠️ No answer provided. Practice explaining core technical mechanisms.",
+                "ideal_answer": "A complete response should explain technical principles and concrete tools."
+            })
+            continue
+
+        # Check Plagiarism / Web Copy-Paste
+        is_copy, copy_reason = detect_ai_or_web_copy(ans.user_answer)
+        if is_copy:
+            evaluations.append({
+                "question_num": idx,
+                "question": ans.question,
+                "user_answer": ans.user_answer,
+                "match_percentage": 0,
+                "feedback": f"{copy_reason} Please write candidate responses in your own original words rather than copy-pasting from Google AI Overview or web search.",
+                "ideal_answer": "Answers must be written directly by candidate without web/AI copy-pasting."
+            })
+            continue
+
+        # Evaluate Technical Keyword Overlap
+        q_words = set(re.findall(r'\b[a-zA-Z]{3,}\b', ans.question.lower()))
+        user_words = set(re.findall(r'\b[a-zA-Z]{3,}\b', ans.user_answer.lower()))
+        common_words = q_words.intersection(user_words)
+        word_count = len(user_words)
+
+        if word_count < 4:
+            score = 15
+            fb = "Answer is too brief. Please provide a detailed technical response."
+        elif len(common_words) >= 1 or word_count >= 8:
+            score = min(85, 40 + len(common_words) * 10 + min(30, word_count * 2))
+            fb = "Strong technical answer alignment!" if score >= 70 else "Good attempt. Include more domain-specific tools and metrics."
+        else:
+            score = 30
+            fb = "Answer lacks specific technical keywords related to the question."
+
         total_score_sum += score
         evaluations.append({
             "question_num": idx,
             "question": ans.question,
-            "user_answer": ans.user_answer if ans.user_answer.strip() else "No answer provided.",
+            "user_answer": ans.user_answer,
             "match_percentage": score,
-            "feedback": "Strong answer alignment!" if words >= 15 else "Answer is somewhat brief. Expand with specific technical tools.",
-            "ideal_answer": f"Ideal response for {ans.question[:40]}... includes core data structures, error handling, and performance metrics."
+            "feedback": fb,
+            "ideal_answer": f"Ideal response for {ans.question[:40]}... includes core data structures and frameworks."
         })
 
     final_percentage = round(total_score_sum / total_q, 1)
