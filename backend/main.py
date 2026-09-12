@@ -492,23 +492,7 @@ def get_history(authorization: Optional[str] = Header(None)):
     return {"history": history}
 
 
-@app.get("/api/notes/download/{skill_name}")
-def download_skill_notes(
-    skill_name: str, 
-    domain: Optional[str] = Query("General Tech & Engineering"),
-    authorization: Optional[str] = Header(None)
-):
-    try:
-        pdf_bytes = generate_notes_pdf(skill_name, domain=domain)
-        safe_filename = skill_name.replace(" ", "_").replace("/", "_") + "_OpenAI_Study_Notes.pdf"
-        return Response(
-            content=pdf_bytes,
-            media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename={safe_filename}"}
-        )
-    except Exception as e:
-        logger.error(f"Error generating PDF notes: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Failed to generate PDF notes: {str(e)}")
+
 
 
 @app.get("/api/health")

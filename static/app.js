@@ -635,15 +635,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Render Side-by-Side Candidate vs Ideal AI Model Answer Evaluation
+    // Render Evaluation Results
     function renderEvaluationResults(data) {
         testEvalResultsContainer.innerHTML = `
             <div class="eval-score-banner">
                 <span class="eval-score-val">${data.overall_score}%</span>
                 <p><strong>Timed Mock Interview Technical Skill Match %</strong></p>
-                <p style="font-size:0.82rem; color:var(--text-muted);">Overall match rating comparing your candidate responses against AI Model Answers.</p>
+                <p style="font-size:0.82rem; color:var(--text-muted);">Overall match rating evaluation of candidate responses.</p>
             </div>
-            <h4 style="margin-top:1rem;"><i class="fa-solid fa-code-compare text-cyan"></i> Side-by-Side Candidate vs AI Model Answer Breakdown:</h4>
+            <h4 style="margin-top:1rem;"><i class="fa-solid fa-code-compare text-cyan"></i> Candidate Answer Evaluation Breakdown:</h4>
         `;
 
         data.evaluations.forEach(e => {
@@ -660,12 +660,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <p style="color:var(--text-secondary); margin-top:0.25rem;">"${e.user_answer}"</p>
                 </div>
 
-                <div style="background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.3); border-radius:var(--radius-sm); padding:0.6rem; margin-top:0.3rem;">
-                    <strong style="color:var(--accent-emerald);"><i class="fa-solid fa-star"></i> Ideal AI Model Answer:</strong>
-                    <p style="color:#a7f3d0; margin-top:0.25rem;">"${e.ideal_answer}"</p>
-                </div>
-
-                <div style="color:var(--accent-cyan); font-size:0.82rem; margin-top:0.3rem;">
+                <div style="color:var(--accent-cyan); font-size:0.82rem; margin-top:0.4rem;">
                     <strong>AI Evaluation Feedback:</strong> ${e.feedback}
                 </div>
             `;
@@ -673,31 +668,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // PDF Notes Download Helper - 100% Free for Everyone
-    window.downloadPdfNotes = async function(skillName) {
-        try {
-            const headers = authToken ? { "Authorization": `Bearer ${authToken}` } : {};
-            const res = await fetch(`/api/notes/download/${encodeURIComponent(skillName)}`, { headers });
 
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                throw new Error(data.detail || "Failed to download PDF notes.");
-            }
-
-            const blob = await res.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `${skillName.replace(/\s+/g, '_')}_OpenAI_Study_Notes.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-
-        } catch (err) {
-            alert(`Download Error: ${err.message}`);
-        }
-    };
 
     btnCopyIp.addEventListener("click", () => {
         const textToCopy = networkUrl || window.location.href;
@@ -973,43 +944,6 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             jobRecsList.appendChild(item);
         });
-
-        // Roadmap Cards Rendering
-        const roadmapGrid = document.getElementById("roadmapGrid");
-        roadmapGrid.innerHTML = "";
-        const isPro = currentUser && currentUser.is_pro;
-
-        if (jobAnalysis.upskill_recommendations.length > 0) {
-            jobAnalysis.upskill_recommendations.forEach(up => {
-                const card = document.createElement("div");
-                card.className = "roadmap-item";
-
-                card.className = "roadmap-item";
-                card.innerHTML = `
-                    <div class="roadmap-skill"><i class="fa-solid fa-lightbulb text-amber"></i> ${up.skill} <span class="pro-resource-badge" style="background:rgba(16,185,129,0.2); color:#a7f3d0; border:1px solid rgba(16,185,129,0.4);">FREE KIT</span></div>
-                    <div class="roadmap-desc" style="margin-bottom:0.75rem;">${up.suggestion}</div>
-                    
-                    <div class="pro-resources-box">
-                        <div class="res-item">
-                            <i class="fa-brands fa-youtube text-rose"></i>
-                            <div>
-                                <strong>${up.video_title || up.skill + ' Video Course'}</strong><br/>
-                                <a href="${up.video_url}" target="_blank" class="btn-res-link">📺 Watch Video Course</a>
-                            </div>
-                        </div>
-                        <div class="res-item">
-                            <i class="fa-solid fa-file-pdf text-cyan"></i>
-                            <div>
-                                <strong>${up.notes_title || up.skill + ' Study Notes'}</strong><br/>
-                                <button class="btn-res-link" style="background:rgba(6,182,212,0.2); color:#a5f3fc; border:1px solid rgba(6,182,212,0.4); margin-top:0.25rem;" onclick="downloadPdfNotes('${up.skill.replace(/'/g, "\\'")}')">
-                                    📄 Download OpenAI PDF Notes
-                            </div>
-                        </div>
-                    </div>
-                `;
-                roadmapGrid.appendChild(card);
-            });
-        }
 
         resultsSection.classList.remove("hidden");
         
