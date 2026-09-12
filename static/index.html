@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <link rel="stylesheet" href="/static/styles.css?v=6.0">
+    <link rel="stylesheet" href="/static/styles.css?v=7.0">
 </head>
 <body>
 
@@ -28,6 +28,11 @@
 
             <!-- Navbar Actions -->
             <div class="nav-right-actions">
+                <!-- Gmail Support Badge -->
+                <a href="mailto:mohammedarhan9829@gmail.com" class="support-badge" style="display:flex; align-items:center; gap:0.4rem; background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.35); color:#a5f3fc; padding:0.4rem 0.8rem; border-radius:var(--radius-full); font-size:0.8rem; text-decoration:none; font-weight:500;" title="Contact Gmail Support: mohammedarhan9829@gmail.com">
+                    <i class="fa-solid fa-envelope text-cyan"></i> Support: mohammedarhan9829@gmail.com
+                </a>
+
                 <!-- LAN IP Badge -->
                 <div class="network-badge" id="networkBadge" title="Click to copy Wi-Fi access link for phone/laptop">
                     <i class="fa-solid fa-wifi"></i>
@@ -367,6 +372,7 @@
     <footer class="footer">
         <div class="footer-content">
             <p>ResuMatch AI 2.0 &bull; Multi-Stream Skill Analyzer & Placement Suite &bull; B.Tech AI & Data Science Capstone Project</p>
+            <p style="margin-top:0.3rem; font-size:0.82rem; color:var(--text-muted);">📧 Technical Support & Inquiries: <a href="mailto:mohammedarhan9829@gmail.com" style="color:var(--accent-cyan); text-decoration:underline;">mohammedarhan9829@gmail.com</a></p>
         </div>
     </footer>
 
@@ -430,40 +436,24 @@
                 </div>
             </form>
 
-            <!-- Forgot Password Form (OTP Verification) -->
+            <!-- Forgot Password Form (Direct Reset Without OTP) -->
             <form id="formForgotPassword" class="modal-form hidden">
-                <h3 class="form-title"><i class="fa-solid fa-key text-amber"></i> Reset Password via OTP</h3>
-                <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1rem;">Request a 6-digit verification OTP code sent to your registered Gmail address.</p>
-                
+                <h3 class="form-title"><i class="fa-solid fa-key text-amber"></i> Reset Password</h3>
+                <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1rem;">Verify your registered Gmail address to set a new password.</p>
                 <div class="form-group">
                     <label for="forgotPwdGmail">Registered Gmail Address</label>
-                    <div style="display:flex; gap:0.5rem;">
-                        <input type="email" id="forgotPwdGmail" class="form-input" required placeholder="candidate@gmail.com" style="flex:1;">
-                        <button type="button" id="btnSendOtp" class="btn-modal-primary" style="width:auto; padding:0 0.8rem; font-size:0.8rem; background:var(--accent-amber); color:#000; white-space:nowrap;">
-                            📩 Send OTP
-                        </button>
-                    </div>
+                    <input type="email" id="forgotPwdGmail" class="form-input" required placeholder="candidate@gmail.com">
                 </div>
-
-                <!-- OTP & New Password Fields -->
-                <div id="otpFieldsContainer" class="hidden">
-                    <div class="form-group">
-                        <label for="forgotOtpCode">6-Digit OTP Verification Code</label>
-                        <input type="text" id="forgotOtpCode" class="form-input" maxlength="6" placeholder="e.g. 482915" style="letter-spacing:4px; font-weight:700; font-size:1.1rem; text-align:center;">
-                    </div>
-                    <div class="form-group">
-                        <label for="forgotNewPassword">New Password (min 6 chars)</label>
-                        <input type="password" id="forgotNewPassword" class="form-input" placeholder="••••••••" minlength="6">
-                    </div>
+                <div class="form-group">
+                    <label for="forgotNewPassword">New Password (min 6 chars)</label>
+                    <input type="password" id="forgotNewPassword" class="form-input" required placeholder="••••••••" minlength="6">
                 </div>
-
                 <div id="forgotPwdResult" class="hidden" style="padding:0.75rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:0.85rem; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#a7f3d0;"></div>
-
-                <button type="submit" id="btnSubmitOtpReset" class="btn-modal-primary hidden" style="background:var(--gradient-pro); color:#000;">
-                    🔐 Verify OTP & Reset Password
-                </button>
-
-                <div style="text-align:center; margin-top:0.75rem;">
+                <button type="submit" class="btn-modal-primary" style="background:var(--gradient-pro); color:#000;">Reset Password via Gmail</button>
+                <div style="text-align:center; margin-top:0.75rem; font-size:0.8rem; color:var(--text-muted);">
+                    📧 Need Help? Contact Support: <a href="mailto:mohammedarhan9829@gmail.com" style="color:var(--accent-cyan); text-decoration:underline; font-weight:600;">mohammedarhan9829@gmail.com</a>
+                </div>
+                <div style="text-align:center; margin-top:0.5rem;">
                     <a href="#" class="btnBackToLogin" style="color:var(--text-muted); font-size:0.82rem; text-decoration:underline;">← Back to Login</a>
                 </div>
             </form>
@@ -510,6 +500,6 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=6.0"></script>
+    <script src="/static/app.js?v=7.0"></script>
 </body>
 </html>
