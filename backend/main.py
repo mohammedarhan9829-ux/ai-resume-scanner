@@ -224,17 +224,17 @@ def detect_ai_or_web_copy(text: str) -> tuple[bool, str]:
 
     # 1. Google AI Overview Header or Hindi/Multi-lingual Overview text
     if "ai overview" in txt_lower or "ai-generated" in txt_lower or "google search" in txt_lower:
-        return True, "🚨 Plagiarism Flagged: Answer copied directly from Google AI Overview / Search engine."
+        return True, "[PLAGIARISM FLAGGED] Answer copied directly from Google AI Overview / Search engine."
 
     # 2. Web URLs or URL citations like [1] (https://...) or http://
     import re
     if re.search(r'\[\d+\]\s*\(\s*https?://', txt) or re.search(r'https?://[^\s]+\.(com|org|in|net|edu|io)', txt):
-        return True, "🚨 Plagiarism Flagged: Web search links or URL citations detected in answer ([1] https://...)."
+        return True, "[PLAGIARISM FLAGGED] Web search links or URL citations detected in answer ([1] https://...)."
 
     # 3. Citation brackets like [1], [2], [3] (2 or more citation numbers)
     citations = re.findall(r'\[\d+\]', txt)
     if len(citations) >= 2:
-        return True, "🚨 Plagiarism Flagged: External web search citation markers [1], [2] detected."
+        return True, "[PLAGIARISM FLAGGED] External web search citation markers [1], [2] detected."
 
     # 4. Copy-pasted AI preamble phrases
     ai_phrases = [
@@ -246,7 +246,7 @@ def detect_ai_or_web_copy(text: str) -> tuple[bool, str]:
         "i am an ai"
     ]
     if any(p in txt_lower for p in ai_phrases):
-        return True, "🚨 Plagiarism Flagged: Copied AI generator preamble text detected."
+        return True, "[PLAGIARISM FLAGGED] Copied AI generator preamble text detected."
 
     return False, ""
 
