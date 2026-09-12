@@ -27,7 +27,7 @@ def get_smtp_connection():
 def send_welcome_email(recipient_gmail: str, candidate_name: str = "Candidate") -> bool:
     """
     Send an automated HTML Welcome Email to new candidates joining ResuMatch AI 2.0.
-    Sends copy to candidate & admin mohammedarhan9829@gmail.com.
+    Sent FROM: mohammedarhan9829@gmail.com TO: candidate's registered Gmail (with admin copy).
     """
     sender = SENDER_EMAIL
     subject = f"🎉 Welcome to ResuMatch AI 2.0, {candidate_name}!"
@@ -74,8 +74,6 @@ def send_welcome_email(recipient_gmail: str, candidate_name: str = "Candidate") 
         msg["Subject"] = subject
         msg["From"] = f"ResuMatch AI Support <{sender}>"
         msg["To"] = recipient_gmail
-        if recipient_gmail.lower() != sender.lower():
-            msg["Cc"] = sender
         msg.attach(MIMEText(html_content, "html"))
 
         recipients = list(set([recipient_gmail, sender]))
@@ -84,7 +82,7 @@ def send_welcome_email(recipient_gmail: str, candidate_name: str = "Candidate") 
         server.sendmail(sender, recipients, msg.as_string())
         server.quit()
 
-        logger.info(f"Welcome email successfully sent to {recipient_gmail} & {sender}")
+        logger.info(f"Welcome email sent from {sender} to candidate {recipient_gmail} (and admin copy)")
         return True
     except Exception as e:
         logger.error(f"Failed to send welcome email to {recipient_gmail}: {e}", exc_info=True)
@@ -93,7 +91,7 @@ def send_welcome_email(recipient_gmail: str, candidate_name: str = "Candidate") 
 
 def send_login_notification_email(recipient_gmail: str, candidate_name: str = "Candidate") -> bool:
     """
-    Send an automated Login Notification Email to candidate & admin mohammedarhan9829@gmail.com on every login.
+    Send an automated Login Notification Email FROM mohammedarhan9829@gmail.com TO candidate's registered Gmail.
     """
     sender = SENDER_EMAIL
     subject = f"🔔 ResuMatch AI - Account Login Alert for {candidate_name}"
@@ -118,7 +116,7 @@ def send_login_notification_email(recipient_gmail: str, candidate_name: str = "C
         </div>
 
         <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #64748b;">
-            <p>Admin Copy: mohammedarhan9829@gmail.com &copy; 2026 ResuMatch AI</p>
+            <p>Support: mohammedarhan9829@gmail.com &copy; 2026 ResuMatch AI</p>
         </div>
     </div>
     """
@@ -128,8 +126,6 @@ def send_login_notification_email(recipient_gmail: str, candidate_name: str = "C
         msg["Subject"] = subject
         msg["From"] = f"ResuMatch AI Support <{sender}>"
         msg["To"] = recipient_gmail
-        if recipient_gmail.lower() != sender.lower():
-            msg["Cc"] = sender
         msg.attach(MIMEText(html_content, "html"))
 
         recipients = list(set([recipient_gmail, sender]))
@@ -138,7 +134,7 @@ def send_login_notification_email(recipient_gmail: str, candidate_name: str = "C
         server.sendmail(sender, recipients, msg.as_string())
         server.quit()
 
-        logger.info(f"Login notification email sent to {recipient_gmail} & {sender}")
+        logger.info(f"Login notification email sent from {sender} to {recipient_gmail}")
         return True
     except Exception as e:
         logger.error(f"Failed to send login notification to {recipient_gmail}: {e}", exc_info=True)
@@ -148,7 +144,7 @@ def send_login_notification_email(recipient_gmail: str, candidate_name: str = "C
 def send_password_reset_confirmation_email(recipient_gmail: str, candidate_name: str = "Candidate") -> bool:
     """
     Send an HTML confirmation email when password reset is completed.
-    Sends copy to candidate & admin mohammedarhan9829@gmail.com.
+    Sent FROM: mohammedarhan9829@gmail.com TO: candidate's registered Gmail.
     """
     sender = SENDER_EMAIL
     subject = "🔐 ResuMatch AI - Password Reset Successful"
@@ -173,7 +169,7 @@ def send_password_reset_confirmation_email(recipient_gmail: str, candidate_name:
         </div>
 
         <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #64748b;">
-            <p>&copy; 2026 ResuMatch AI Career Engine. Sender & Admin: mohammedarhan9829@gmail.com</p>
+            <p>&copy; 2026 ResuMatch AI Career Engine. Sender & Support: mohammedarhan9829@gmail.com</p>
         </div>
     </div>
     """
@@ -183,8 +179,6 @@ def send_password_reset_confirmation_email(recipient_gmail: str, candidate_name:
         msg["Subject"] = subject
         msg["From"] = f"ResuMatch AI Support <{sender}>"
         msg["To"] = recipient_gmail
-        if recipient_gmail.lower() != sender.lower():
-            msg["Cc"] = sender
         msg.attach(MIMEText(html_content, "html"))
 
         recipients = list(set([recipient_gmail, sender]))
@@ -193,7 +187,7 @@ def send_password_reset_confirmation_email(recipient_gmail: str, candidate_name:
         server.sendmail(sender, recipients, msg.as_string())
         server.quit()
 
-        logger.info(f"Password reset confirmation email sent to {recipient_gmail} & {sender}")
+        logger.info(f"Password reset confirmation email sent from {sender} to {recipient_gmail}")
         return True
     except Exception as e:
         logger.error(f"Failed to send password reset confirmation to {recipient_gmail}: {e}", exc_info=True)
@@ -203,7 +197,7 @@ def send_password_reset_confirmation_email(recipient_gmail: str, candidate_name:
 def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "Candidate") -> bool:
     """
     Send a 6-digit password reset verification OTP code to candidate's Gmail via SMTP.
-    Sends copy to candidate & admin mohammedarhan9829@gmail.com.
+    Sent FROM: mohammedarhan9829@gmail.com TO: candidate's registered Gmail.
     """
     sender = SENDER_EMAIL
     subject = f"🔐 ResuMatch AI - Password Reset OTP Code: {otp_code}"
@@ -233,7 +227,7 @@ def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "C
         </div>
 
         <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #64748b;">
-            <p>Official Support & Admin: <a href="mailto:mohammedarhan9829@gmail.com" style="color: #38bdf8; text-decoration: none;">mohammedarhan9829@gmail.com</a></p>
+            <p>Official Support & Sender: <a href="mailto:mohammedarhan9829@gmail.com" style="color: #38bdf8; text-decoration: none;">mohammedarhan9829@gmail.com</a></p>
             <p>&copy; 2026 ResuMatch AI Career Engine. All rights reserved.</p>
         </div>
     </div>
@@ -244,8 +238,6 @@ def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "C
         msg["Subject"] = subject
         msg["From"] = f"ResuMatch AI Support <{sender}>"
         msg["To"] = recipient_gmail
-        if recipient_gmail.lower() != sender.lower():
-            msg["Cc"] = sender
         msg.attach(MIMEText(html_content, "html"))
 
         recipients = list(set([recipient_gmail, sender]))
@@ -254,7 +246,7 @@ def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "C
         server.sendmail(sender, recipients, msg.as_string())
         server.quit()
 
-        logger.info(f"Successfully sent OTP email to {recipient_gmail} & {sender}")
+        logger.info(f"Successfully sent OTP email from {sender} to candidate {recipient_gmail}")
         return True
     except Exception as e:
         logger.error(f"Failed to send OTP email via SMTP to {recipient_gmail}: {e}", exc_info=True)
