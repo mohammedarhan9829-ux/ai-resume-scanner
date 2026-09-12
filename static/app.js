@@ -512,15 +512,15 @@ document.addEventListener("DOMContentLoaded", () => {
             liveTestContainer.classList.remove("hidden");
             testEvalResultsContainer.classList.add("hidden");
             
-            // Start 10-Minute (600s) Countdown Timer
-            startCountdownTimer(600);
+            // Start 5-Minute (300s) Express Countdown Timer
+            startCountdownTimer(300);
             renderTestQuestion(currentQIndex);
 
         } catch (err) {
             alert(`Test Error: ${err.message}`);
         } finally {
             btnStartLiveTest.disabled = false;
-            btnStartLiveTest.innerHTML = `<i class="fa-solid fa-rotate-right"></i> Restart Timed 10-Q Test`;
+            btnStartLiveTest.innerHTML = `<i class="fa-solid fa-rotate-right"></i> Restart Express 5-Min Test`;
         }
     });
 
@@ -535,7 +535,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (secondsRemaining <= 0) {
                 clearInterval(testTimerInterval);
-                alert("⏱️ Time's Up! 10-minute interview limit reached. Auto-submitting test for AI Evaluation...");
+                alert("⏱️ Time's Up! 5-minute express interview limit reached. Auto-submitting test for AI Evaluation...");
                 submitTestAnswers();
             }
         }, 1000);
