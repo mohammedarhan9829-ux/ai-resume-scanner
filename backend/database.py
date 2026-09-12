@@ -194,12 +194,22 @@ class UserManager:
         conn.commit()
         conn.close()
 
+        # Dispatch real email via SMTP from mohammedarhan9829@gmail.com
+        try:
+            from backend.email_service import send_otp_email
+            email_sent = send_otp_email(gmail_clean, otp_code, row["name"])
+        except Exception:
+            email_sent = False
+
+        status_msg = f"🔑 6-Digit OTP Verification Code sent to '{gmail_clean}' from mohammedarhan9829@gmail.com!" if email_sent else f"🔑 6-Digit OTP Code generated for '{gmail_clean}'! (Valid for 10 min)"
+
         return {
             "success": True,
-            "message": f"🔑 6-Digit OTP Code sent to '{gmail_clean}'! (Valid for 10 min)",
+            "message": status_msg,
             "otp_code": otp_code,
             "gmail": gmail_clean,
-            "name": row["name"]
+            "name": row["name"],
+            "email_sent": email_sent
         }
 
     @classmethod

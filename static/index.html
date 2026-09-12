@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <link rel="stylesheet" href="/static/styles.css?v=7.0">
+    <link rel="stylesheet" href="/static/styles.css?v=8.0">
 </head>
 <body>
 
@@ -436,22 +436,43 @@
                 </div>
             </form>
 
-            <!-- Forgot Password Form (Direct Reset Without OTP) -->
+            <!-- Forgot Password Form (6-Digit OTP via mohammedarhan9829@gmail.com) -->
             <form id="formForgotPassword" class="modal-form hidden">
-                <h3 class="form-title"><i class="fa-solid fa-key text-amber"></i> Reset Password</h3>
-                <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1rem;">Verify your registered Gmail address to set a new password.</p>
+                <h3 class="form-title"><i class="fa-solid fa-key text-amber"></i> Reset Password via OTP</h3>
+                <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1rem;">
+                    A 6-digit verification OTP code will be sent to your Gmail from <strong>mohammedarhan9829@gmail.com</strong>.
+                </p>
+                
                 <div class="form-group">
                     <label for="forgotPwdGmail">Registered Gmail Address</label>
-                    <input type="email" id="forgotPwdGmail" class="form-input" required placeholder="candidate@gmail.com">
+                    <div style="display:flex; gap:0.5rem;">
+                        <input type="email" id="forgotPwdGmail" class="form-input" required placeholder="candidate@gmail.com" style="flex:1;">
+                        <button type="button" id="btnSendOtp" class="btn-modal-primary" style="width:auto; padding:0 0.8rem; font-size:0.8rem; background:var(--accent-amber); color:#000; white-space:nowrap;">
+                            📩 Send 6-Digit OTP
+                        </button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="forgotNewPassword">New Password (min 6 chars)</label>
-                    <input type="password" id="forgotNewPassword" class="form-input" required placeholder="••••••••" minlength="6">
+
+                <!-- OTP & New Password Fields -->
+                <div id="otpFieldsContainer" class="hidden">
+                    <div class="form-group">
+                        <label for="forgotOtpCode">6-Digit Verification OTP Code</label>
+                        <input type="text" id="forgotOtpCode" class="form-input" maxlength="6" placeholder="735826" style="letter-spacing:4px; font-weight:700; font-size:1.1rem; text-align:center;">
+                    </div>
+                    <div class="form-group">
+                        <label for="forgotNewPassword">New Password (min 6 chars)</label>
+                        <input type="password" id="forgotNewPassword" class="form-input" placeholder="••••••••" minlength="6">
+                    </div>
                 </div>
+
                 <div id="forgotPwdResult" class="hidden" style="padding:0.75rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:0.85rem; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#a7f3d0;"></div>
-                <button type="submit" class="btn-modal-primary" style="background:var(--gradient-pro); color:#000;">Reset Password via Gmail</button>
+
+                <button type="submit" id="btnSubmitOtpReset" class="btn-modal-primary hidden" style="background:var(--gradient-pro); color:#000;">
+                    🔐 Verify OTP & Reset Password
+                </button>
+
                 <div style="text-align:center; margin-top:0.75rem; font-size:0.8rem; color:var(--text-muted);">
-                    📧 Need Help? Contact Support: <a href="mailto:mohammedarhan9829@gmail.com" style="color:var(--accent-cyan); text-decoration:underline; font-weight:600;">mohammedarhan9829@gmail.com</a>
+                    📧 Sender & Support: <a href="mailto:mohammedarhan9829@gmail.com" style="color:var(--accent-cyan); text-decoration:underline; font-weight:600;">mohammedarhan9829@gmail.com</a>
                 </div>
                 <div style="text-align:center; margin-top:0.5rem;">
                     <a href="#" class="btnBackToLogin" style="color:var(--text-muted); font-size:0.82rem; text-decoration:underline;">← Back to Login</a>
@@ -500,6 +521,6 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=7.0"></script>
+    <script src="/static/app.js?v=8.0"></script>
 </body>
 </html>
