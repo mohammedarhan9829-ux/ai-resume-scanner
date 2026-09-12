@@ -45,6 +45,13 @@ class LoginSchema(BaseModel):
     email: str
     password: str
 
+class ForgotUsernameSchema(BaseModel):
+    gmail: str
+
+class ForgotPasswordSchema(BaseModel):
+    gmail: str
+    new_password: str
+
 class UpgradeSchema(BaseModel):
     plan: str = "pro"
     payment_ref: Optional[str] = "UPI_SUCCESS_150"
@@ -341,6 +348,28 @@ def login(data: LoginSchema):
     try:
         result = UserManager.login_user(data.email, data.password)
         return {"success": True, "message": "Login successful!", **result}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/auth/forgot-username")
+def forgot_username(data: ForgotUsernameSchema):
+    try:
+        result = UserManager.find_username_by_gmail(data.gmail)
+        return {
+            "success": True, 
+            "message": f"Account Found! Registered Candidate Name: '{result['name']}'", 
+            **result
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/auth/forgot-password")
+def forgot_password(data: ForgotPasswordSchema):
+    try:
+        result = UserManager.reset_password_by_gmail(data.gmail, data.new_password)
+        return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

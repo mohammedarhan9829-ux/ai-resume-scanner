@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <link rel="stylesheet" href="/static/styles.css?v=3.0">
+    <link rel="stylesheet" href="/static/styles.css?v=4.0">
 </head>
 <body>
 
@@ -383,32 +383,70 @@
             <form id="formLogin" class="modal-form">
                 <h3 class="form-title">Welcome Back</h3>
                 <div class="form-group">
-                    <label for="loginEmail">Email Address</label>
-                    <input type="email" id="loginEmail" class="form-input" required placeholder="student@college.edu">
+                    <label for="loginEmail">Registered Gmail Address</label>
+                    <input type="email" id="loginEmail" class="form-input" required placeholder="candidate@gmail.com">
                 </div>
                 <div class="form-group">
                     <label for="loginPassword">Password</label>
                     <input type="password" id="loginPassword" class="form-input" required placeholder="••••••••">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem; font-size:0.82rem;">
+                        <a href="#" id="linkForgotUsername" style="color:var(--accent-cyan); text-decoration:none;"><i class="fa-solid fa-user-gear"></i> Forgot Username?</a>
+                        <a href="#" id="linkForgotPassword" style="color:var(--accent-amber); text-decoration:none;"><i class="fa-solid fa-key"></i> Forgot Password?</a>
+                    </div>
                 </div>
-                <button type="submit" class="btn-modal-primary">Log In</button>
+                <button type="submit" class="btn-modal-primary" style="margin-top:0.75rem;">Log In</button>
             </form>
 
             <!-- Register Form -->
             <form id="formRegister" class="modal-form hidden">
                 <h3 class="form-title">Create Account</h3>
                 <div class="form-group">
-                    <label for="regName">Full Name</label>
+                    <label for="regName">Full Name / Candidate Name</label>
                     <input type="text" id="regName" class="form-input" required placeholder="Alex Sharma">
                 </div>
                 <div class="form-group">
-                    <label for="regEmail">Email Address</label>
-                    <input type="email" id="regEmail" class="form-input" required placeholder="alex@college.edu">
+                    <label for="regEmail">Gmail Address <span style="color:var(--accent-rose); font-size:0.78rem;">(Required: @gmail.com)</span></label>
+                    <input type="email" id="regEmail" class="form-input" required placeholder="alex@gmail.com" pattern=".*@gmail\.com$">
                 </div>
                 <div class="form-group">
                     <label for="regPassword">Password (min 6 chars)</label>
-                    <input type="password" id="regPassword" class="form-input" required placeholder="••••••••">
+                    <input type="password" id="regPassword" class="form-input" required placeholder="••••••••" minlength="6">
                 </div>
                 <button type="submit" class="btn-modal-primary">Register Account</button>
+            </form>
+
+            <!-- Forgot Username Form -->
+            <form id="formForgotUsername" class="modal-form hidden">
+                <h3 class="form-title"><i class="fa-solid fa-user-gear text-cyan"></i> Recover Username</h3>
+                <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1rem;">Enter your registered Gmail address to retrieve your candidate account name.</p>
+                <div class="form-group">
+                    <label for="forgotUserGmail">Registered Gmail Address</label>
+                    <input type="email" id="forgotUserGmail" class="form-input" required placeholder="candidate@gmail.com">
+                </div>
+                <div id="forgotUserResult" class="hidden" style="padding:0.75rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:0.85rem; background:rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); color:#a5f3fc;"></div>
+                <button type="submit" class="btn-modal-primary" style="background:var(--accent-cyan); color:#000;">Find My Account</button>
+                <div style="text-align:center; margin-top:0.75rem;">
+                    <a href="#" class="btnBackToLogin" style="color:var(--text-muted); font-size:0.82rem; text-decoration:underline;">← Back to Login</a>
+                </div>
+            </form>
+
+            <!-- Forgot Password Form -->
+            <form id="formForgotPassword" class="modal-form hidden">
+                <h3 class="form-title"><i class="fa-solid fa-key text-amber"></i> Reset Password</h3>
+                <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1rem;">Verify your registered Gmail address to set a new password.</p>
+                <div class="form-group">
+                    <label for="forgotPwdGmail">Registered Gmail Address</label>
+                    <input type="email" id="forgotPwdGmail" class="form-input" required placeholder="candidate@gmail.com">
+                </div>
+                <div class="form-group">
+                    <label for="forgotNewPassword">New Password (min 6 chars)</label>
+                    <input type="password" id="forgotNewPassword" class="form-input" required placeholder="••••••••" minlength="6">
+                </div>
+                <div id="forgotPwdResult" class="hidden" style="padding:0.75rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:0.85rem; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#a7f3d0;"></div>
+                <button type="submit" class="btn-modal-primary" style="background:var(--gradient-pro); color:#000;">Reset Password via Gmail</button>
+                <div style="text-align:center; margin-top:0.75rem;">
+                    <a href="#" class="btnBackToLogin" style="color:var(--text-muted); font-size:0.82rem; text-decoration:underline;">← Back to Login</a>
+                </div>
             </form>
         </div>
     </div>
@@ -453,6 +491,6 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=3.0"></script>
+    <script src="/static/app.js?v=4.0"></script>
 </body>
 </html>

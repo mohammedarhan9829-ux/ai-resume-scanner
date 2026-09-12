@@ -64,6 +64,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const tabRegister = document.getElementById("tabRegister");
     const formLogin = document.getElementById("formLogin");
     const formRegister = document.getElementById("formRegister");
+    const formForgotUsername = document.getElementById("formForgotUsername");
+    const formForgotPassword = document.getElementById("formForgotPassword");
+    const linkForgotUsername = document.getElementById("linkForgotUsername");
+    const linkForgotPassword = document.getElementById("linkForgotPassword");
+    const forgotUserGmail = document.getElementById("forgotUserGmail");
+    const forgotUserResult = document.getElementById("forgotUserResult");
+    const forgotPwdGmail = document.getElementById("forgotPwdGmail");
+    const forgotNewPassword = document.getElementById("forgotNewPassword");
+    const forgotPwdResult = document.getElementById("forgotPwdResult");
 
     const profileModal = document.getElementById("profileModal");
     const btnCloseProfileModal = document.getElementById("btnCloseProfileModal");
@@ -157,23 +166,62 @@ document.addEventListener("DOMContentLoaded", () => {
     btnOpenProfile.addEventListener("click", () => openProfileModal());
     btnCloseProfileModal.addEventListener("click", () => profileModal.classList.add("hidden"));
 
+    function hideAllAuthForms() {
+        formLogin.classList.add("hidden");
+        formRegister.classList.add("hidden");
+        if (formForgotUsername) formForgotUsername.classList.add("hidden");
+        if (formForgotPassword) formForgotPassword.classList.add("hidden");
+    }
+
     tabLogin.addEventListener("click", () => {
         tabLogin.classList.add("active");
         tabRegister.classList.remove("active");
+        hideAllAuthForms();
         formLogin.classList.remove("hidden");
-        formRegister.classList.add("hidden");
     });
 
     tabRegister.addEventListener("click", () => {
         tabRegister.classList.add("active");
         tabLogin.classList.remove("active");
+        hideAllAuthForms();
         formRegister.classList.remove("hidden");
-        formLogin.classList.add("hidden");
+    });
+
+    if (linkForgotUsername) {
+        linkForgotUsername.addEventListener("click", (e) => {
+            e.preventDefault();
+            tabLogin.classList.remove("active");
+            tabRegister.classList.remove("active");
+            hideAllAuthForms();
+            if (forgotUserResult) forgotUserResult.classList.add("hidden");
+            formForgotUsername.classList.remove("hidden");
+        });
+    }
+
+    if (linkForgotPassword) {
+        linkForgotPassword.addEventListener("click", (e) => {
+            e.preventDefault();
+            tabLogin.classList.remove("active");
+            tabRegister.classList.remove("active");
+            hideAllAuthForms();
+            if (forgotPwdResult) forgotPwdResult.classList.add("hidden");
+            formForgotPassword.classList.remove("hidden");
+        });
+    }
+
+    document.querySelectorAll(".btnBackToLogin").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            tabLogin.classList.add("active");
+            tabRegister.classList.remove("active");
+            hideAllAuthForms();
+            formLogin.classList.remove("hidden");
+        });
     });
 
     formLogin.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const email = document.getElementById("loginEmail").value;
+        const email = document.getElementById("loginEmail").value.trim();
         const password = document.getElementById("loginPassword").value;
         try {
             const res = await fetch("/api/auth/login", {
@@ -196,9 +244,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     formRegister.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const name = document.getElementById("regName").value;
-        const email = document.getElementById("regEmail").value;
+        const name = document.getElementById("regName").value.trim();
+        const email = document.getElementById("regEmail").value.trim();
         const password = document.getElementById("regPassword").value;
+
+        if (!email.toLowerCase().endsWith("@gmail.com")) {
+            alert("⚠️ Registration requires a valid Gmail address ending with @gmail.com (e.g. yourname@gmail.com).");
+            return;
+        }
+
         try {
             const res = await fetch("/api/auth/register", {
                 method: "POST",
@@ -217,6 +271,61 @@ document.addEventListener("DOMContentLoaded", () => {
             alert(`Registration Error: ${err.message}`);
         }
     });
+
+    if (formForgotUsername) {
+        formForgotUsername.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const gmail = forgotUserGmail.value.trim();
+            if (!gmail.toLowerCase().endsWith("@gmail.com")) {
+                alert("⚠️ Please enter a valid Gmail address ending with @gmail.com.");
+                return;
+            }
+            try {
+                const res = await fetch("/api/auth/forgot-username", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ gmail })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Account lookup failed.");
+                forgotUserResult.innerHTML = `<strong><i class="fa-solid fa-circle-check text-emerald"></i> ${data.message}</strong>`;
+                forgotUserResult.classList.remove("hidden");
+            } catch (err) {
+                forgotUserResult.innerHTML = `<span style="color:var(--accent-rose);"><i class="fa-solid fa-circle-xmark"></i> ${err.message}</span>`;
+                forgotUserResult.classList.remove("hidden");
+            }
+        });
+    }
+
+    if (formForgotPassword) {
+        formForgotPassword.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const gmail = forgotPwdGmail.value.trim();
+            const new_password = forgotNewPassword.value;
+            if (!gmail.toLowerCase().endsWith("@gmail.com")) {
+                alert("⚠️ Please enter a valid Gmail address ending with @gmail.com.");
+                return;
+            }
+            if (new_password.length < 6) {
+                alert("⚠️ Password must be at least 6 characters long.");
+                return;
+            }
+            try {
+                const res = await fetch("/api/auth/forgot-password", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ gmail, new_password })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Password reset failed.");
+                forgotPwdResult.innerHTML = `<strong><i class="fa-solid fa-circle-check text-emerald"></i> ${data.message}</strong>`;
+                forgotPwdResult.classList.remove("hidden");
+            } catch (err) {
+                forgotPwdResult.innerHTML = `<span style="color:var(--accent-rose);"><i class="fa-solid fa-circle-xmark"></i> ${err.message}</span>`;
+                forgotPwdResult.classList.remove("hidden");
+            }
+        });
+    }
 
     btnLogout.addEventListener("click", () => {
         localStorage.removeItem("user_token");

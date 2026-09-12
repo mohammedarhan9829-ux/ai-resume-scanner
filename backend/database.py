@@ -78,15 +78,21 @@ class UserManager:
 
     @classmethod
     def register_user(cls, name: str, email: str, password: str) -> Dict[str, Any]:
-        """Register a new user account."""
+        """Register a new user account with required Gmail address."""
         email_clean = email.strip().lower()
+        if not email_clean.endswith("@gmail.com"):
+            raise ValueError("Registration requires a valid Gmail address ending with @gmail.com")
+
+        if not password or len(password) < 6:
+            raise ValueError("Password must be at least 6 characters long.")
+
         conn = get_db_connection()
         cursor = conn.cursor()
 
         cursor.execute("SELECT id FROM users WHERE email = ?", (email_clean,))
         if cursor.fetchone():
             conn.close()
-            raise ValueError("An account with this email address already exists.")
+            raise ValueError("An account with this Gmail address already exists.")
 
         pwd_hash, salt = hash_password(password)
         now_str = datetime.now().isoformat()
@@ -105,6 +111,53 @@ class UserManager:
         return {"token": token, "user": user_data}
 
     @classmethod
+    def find_username_by_gmail(cls, gmail: str) -> Dict[str, Any]:
+        """Retrieve candidate username by verifying registered Gmail address."""
+        gmail_clean = gmail.strip().lower()
+        if not gmail_clean.endswith("@gmail.com"):
+            raise ValueError("Please enter a valid Gmail address ending with @gmail.com")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name, email FROM users WHERE email = ?", (gmail_clean,))
+        row = cursor.fetchone()
+        conn.close()
+
+        if not row:
+            raise ValueError("No registered account found with this Gmail address.")
+
+        return {"id": row["id"], "name": row["name"], "email": row["email"]}
+
+    @classmethod
+    def reset_password_by_gmail(cls, gmail: str, new_password: str) -> Dict[str, Any]:
+        """Reset user password via Gmail verification."""
+        gmail_clean = gmail.strip().lower()
+        if not gmail_clean.endswith("@gmail.com"):
+            raise ValueError("Please enter a valid Gmail address ending with @gmail.com")
+
+        if not new_password or len(new_password) < 6:
+            raise ValueError("New password must be at least 6 characters long.")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name FROM users WHERE email = ?", (gmail_clean,))
+        row = cursor.fetchone()
+        if not row:
+            conn.close()
+            raise ValueError("No registered account found with this Gmail address.")
+
+        pwd_hash, salt = hash_password(new_password)
+        cursor.execute("UPDATE users SET password_hash = ?, salt = ? WHERE id = ?", (pwd_hash, salt, row["id"]))
+        conn.commit()
+        conn.close()
+
+        return {
+            "success": True, 
+            "message": f"🎉 Password reset successful for '{row['name']}'! You can now log in with your new password.", 
+            "name": row["name"]
+        }
+
+    @classmethod
     def login_user(cls, email: str, password: str) -> Dict[str, Any]:
         """Authenticate user credentials and generate session token."""
         email_clean = email.strip().lower()
@@ -115,12 +168,12 @@ class UserManager:
         user_row = cursor.fetchone()
         if not user_row:
             conn.close()
-            raise ValueError("Invalid email address or password.")
+            raise ValueError("Invalid Gmail address or password.")
 
         pwd_hash, _ = hash_password(password, user_row["salt"])
         if pwd_hash != user_row["password_hash"]:
             conn.close()
-            raise ValueError("Invalid email address or password.")
+            raise ValueError("Invalid Gmail address or password.")
 
         conn.close()
         token, user_data = cls.create_session(user_row["id"])
