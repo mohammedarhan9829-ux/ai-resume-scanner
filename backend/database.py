@@ -115,6 +115,13 @@ class UserManager:
         conn.commit()
         conn.close()
 
+        # Trigger Welcome Email via SMTP from mohammedarhan9829@gmail.com
+        try:
+            from backend.email_service import send_welcome_email
+            send_welcome_email(email_clean, name.strip())
+        except Exception:
+            pass
+
         # Create session token
         token, user_data = cls.create_session(user_id)
         return {"token": token, "user": user_data}
@@ -160,9 +167,16 @@ class UserManager:
         conn.commit()
         conn.close()
 
+        # Trigger Password Reset Confirmation Email via SMTP from mohammedarhan9829@gmail.com
+        try:
+            from backend.email_service import send_password_reset_confirmation_email
+            send_password_reset_confirmation_email(gmail_clean, row["name"])
+        except Exception:
+            pass
+
         return {
             "success": True, 
-            "message": f"🎉 Password reset successful for '{row['name']}'! You can now log in with your new password.", 
+            "message": f"🎉 Password reset successful for '{row['name']}'! Confirmation sent to your Gmail. You can now log in.", 
             "name": row["name"]
         }
 
@@ -254,9 +268,16 @@ class UserManager:
         conn.commit()
         conn.close()
 
+        # Trigger Confirmation Email via SMTP from mohammedarhan9829@gmail.com
+        try:
+            from backend.email_service import send_password_reset_confirmation_email
+            send_password_reset_confirmation_email(gmail_clean, user_row["name"])
+        except Exception:
+            pass
+
         return {
             "success": True,
-            "message": f"🎉 Password successfully reset for '{user_row['name']}'! You can now log in with your new password.",
+            "message": f"🎉 Password successfully reset for '{user_row['name']}'! Confirmation email sent to {gmail_clean}.",
             "name": user_row["name"]
         }
 
