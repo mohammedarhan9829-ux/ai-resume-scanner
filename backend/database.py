@@ -229,16 +229,15 @@ class UserManager:
         conn.commit()
         conn.close()
 
-        # Dispatch real email via SMTP in background thread
-        import threading
+        # Dispatch real email via SMTP to customer email
         try:
             from backend.email_service import send_otp_email
-            threading.Thread(target=send_otp_email, args=(gmail_clean, otp_code, cand_name), daemon=True).start()
-            email_sent = True
-        except Exception:
+            email_sent = send_otp_email(gmail_clean, otp_code, cand_name)
+        except Exception as err:
+            logger.error(f"Failed to send OTP to {gmail_clean}: {err}")
             email_sent = False
 
-        status_msg = f"🔑 6-Digit OTP Verification Code sent to '{gmail_clean}' from mohammedarhan9829@gmail.com!"
+        status_msg = f"🔑 6-Digit OTP Verification Code sent to '{gmail_clean}' from mohammedarhan9829@gmail.com! Please check your Gmail Inbox."
 
         return {
             "success": True,
