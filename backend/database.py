@@ -243,7 +243,6 @@ class UserManager:
         return {
             "success": True,
             "message": status_msg,
-            "otp_code": otp_code,
             "gmail": gmail_clean,
             "name": cand_name,
             "email_sent": email_sent

@@ -321,15 +321,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.detail || "Failed to send OTP.");
                 
-                let infoHtml = `<strong><i class="fa-solid fa-paper-plane text-emerald"></i> ${data.message}</strong>`;
-                if (data.otp_code) {
-                    infoHtml += `
-                        <div style="margin-top:0.4rem; padding:0.4rem; background:rgba(245,158,11,0.2); border-radius:4px; color:#fef08a; font-size:0.82rem;">
-                            <strong>Verification OTP Code:</strong> <span style="font-weight:800; letter-spacing:2px; font-size:0.95rem;">${data.otp_code}</span>
-                        </div>
-                    `;
-                    if (forgotOtpCode) forgotOtpCode.value = data.otp_code;
-                }
+                let infoHtml = `<strong><i class="fa-solid fa-paper-plane text-emerald"></i> 6-Digit OTP Code sent to '${gmail}'! Please check your Gmail Inbox (or Spam folder) for the email from mohammedarhan9829@gmail.com.</strong>`;
+                if (forgotOtpCode) forgotOtpCode.value = "";
                 forgotPwdResult.innerHTML = infoHtml;
                 forgotPwdResult.classList.remove("hidden");
                 if (otpFieldsContainer) otpFieldsContainer.classList.remove("hidden");

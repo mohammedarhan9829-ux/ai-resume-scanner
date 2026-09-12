@@ -200,7 +200,9 @@ def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "C
     Sent FROM: mohammedarhan9829@gmail.com TO: candidate's registered Gmail.
     """
     sender = SENDER_EMAIL
-    subject = f"🔐 ResuMatch AI - Password Reset OTP Code: {otp_code}"
+    subject = "🔐 ResuMatch AI - Your 6-Digit Password Reset OTP Code"
+
+    plain_text = f"Hello {candidate_name},\n\nYour 6-digit OTP verification code for ResuMatch AI is: {otp_code}\n\nThis code is valid for 10 minutes.\nIf you did not request this, please ignore this email.\n\nSupport: mohammedarhan9829@gmail.com"
 
     html_content = f"""
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 550px; margin: 0 auto; background: #0f172a; color: #f8fafc; padding: 24px; border-radius: 12px; border: 1px solid #334155;">
@@ -238,6 +240,7 @@ def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "C
         msg["Subject"] = subject
         msg["From"] = f"ResuMatch AI Support <{sender}>"
         msg["To"] = recipient_gmail
+        msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_content, "html"))
 
         recipients = list(set([recipient_gmail, sender]))
