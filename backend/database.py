@@ -332,6 +332,15 @@ class UserManager:
 
         conn.close()
         token, user_data = cls.create_session(user_row["id"])
+
+        # Trigger Login Notification Email in background thread to candidate & mohammedarhan9829@gmail.com
+        import threading
+        try:
+            from backend.email_service import send_login_notification_email
+            threading.Thread(target=send_login_notification_email, args=(user_row["email"], user_row["name"]), daemon=True).start()
+        except Exception:
+            pass
+
         return {"token": token, "user": user_data}
 
     @classmethod
