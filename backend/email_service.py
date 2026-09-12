@@ -27,10 +27,12 @@ def get_smtp_connection():
 def send_welcome_email(recipient_gmail: str, candidate_name: str = "Candidate") -> bool:
     """
     Send an automated HTML Welcome Email to new candidates joining ResuMatch AI 2.0.
-    Sent FROM: mohammedarhan9829@gmail.com TO: candidate's registered Gmail (with admin copy).
+    Sent FROM: mohammedarhan9829@gmail.com TO: candidate's registered Gmail.
     """
     sender = SENDER_EMAIL
     subject = f"🎉 Welcome to ResuMatch AI 2.0, {candidate_name}!"
+
+    plain_text = f"Welcome to ResuMatch AI 2.0, {candidate_name}!\n\nThank you for registering with {recipient_gmail}. You have 100% Free & Unlimited Access to our AI placement career suite.\n\nStart scanning your resume now: https://ai-resume-scanner-439j.onrender.com\n\nSupport: mohammedarhan9829@gmail.com"
 
     html_content = f"""
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #0f172a; color: #f8fafc; padding: 28px; border-radius: 14px; border: 1px solid #334155;">
@@ -72,17 +74,28 @@ def send_welcome_email(recipient_gmail: str, candidate_name: str = "Candidate") 
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"] = f"ResuMatch AI Support <{sender}>"
+        msg["From"] = f"ResuMatch AI <{sender}>"
         msg["To"] = recipient_gmail
+        msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_content, "html"))
 
-        recipients = list(set([recipient_gmail, sender]))
-
         server = get_smtp_connection()
-        server.sendmail(sender, recipients, msg.as_string())
-        server.quit()
+        server.sendmail(sender, [recipient_gmail], msg.as_string())
 
-        logger.info(f"Welcome email sent from {sender} to candidate {recipient_gmail} (and admin copy)")
+        if recipient_gmail.lower() != sender.lower():
+            try:
+                admin_msg = MIMEMultipart("alternative")
+                admin_msg["Subject"] = f"[ADMIN NOTIFICATION] New Candidate Registered: {candidate_name} ({recipient_gmail})"
+                admin_msg["From"] = f"ResuMatch AI <{sender}>"
+                admin_msg["To"] = sender
+                admin_msg.attach(MIMEText(plain_text, "plain"))
+                admin_msg.attach(MIMEText(html_content, "html"))
+                server.sendmail(sender, [sender], admin_msg.as_string())
+            except Exception:
+                pass
+
+        server.quit()
+        logger.info(f"Welcome email sent from {sender} to candidate {recipient_gmail}")
         return True
     except Exception as e:
         logger.error(f"Failed to send welcome email to {recipient_gmail}: {e}", exc_info=True)
@@ -95,6 +108,8 @@ def send_login_notification_email(recipient_gmail: str, candidate_name: str = "C
     """
     sender = SENDER_EMAIL
     subject = f"🔔 ResuMatch AI - Account Login Alert for {candidate_name}"
+
+    plain_text = f"Hello {candidate_name},\n\nA new login was recorded for your account {recipient_gmail} on ResuMatch AI.\nIf you did not perform this login, please contact support at mohammedarhan9829@gmail.com."
 
     html_content = f"""
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 550px; margin: 0 auto; background: #0f172a; color: #f8fafc; padding: 24px; border-radius: 12px; border: 1px solid #334155;">
@@ -124,16 +139,27 @@ def send_login_notification_email(recipient_gmail: str, candidate_name: str = "C
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"] = f"ResuMatch AI Support <{sender}>"
+        msg["From"] = f"ResuMatch AI <{sender}>"
         msg["To"] = recipient_gmail
+        msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_content, "html"))
 
-        recipients = list(set([recipient_gmail, sender]))
-
         server = get_smtp_connection()
-        server.sendmail(sender, recipients, msg.as_string())
-        server.quit()
+        server.sendmail(sender, [recipient_gmail], msg.as_string())
 
+        if recipient_gmail.lower() != sender.lower():
+            try:
+                admin_msg = MIMEMultipart("alternative")
+                admin_msg["Subject"] = f"[ADMIN NOTIFICATION] Candidate Login: {candidate_name} ({recipient_gmail})"
+                admin_msg["From"] = f"ResuMatch AI <{sender}>"
+                admin_msg["To"] = sender
+                admin_msg.attach(MIMEText(plain_text, "plain"))
+                admin_msg.attach(MIMEText(html_content, "html"))
+                server.sendmail(sender, [sender], admin_msg.as_string())
+            except Exception:
+                pass
+
+        server.quit()
         logger.info(f"Login notification email sent from {sender} to {recipient_gmail}")
         return True
     except Exception as e:
@@ -148,6 +174,8 @@ def send_password_reset_confirmation_email(recipient_gmail: str, candidate_name:
     """
     sender = SENDER_EMAIL
     subject = "🔐 ResuMatch AI - Password Reset Successful"
+
+    plain_text = f"Hello {candidate_name},\n\nYour password for {recipient_gmail} has been successfully reset.\nIf you did not make this change, contact support immediately at mohammedarhan9829@gmail.com."
 
     html_content = f"""
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 550px; margin: 0 auto; background: #0f172a; color: #f8fafc; padding: 24px; border-radius: 12px; border: 1px solid #334155;">
@@ -177,16 +205,27 @@ def send_password_reset_confirmation_email(recipient_gmail: str, candidate_name:
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"] = f"ResuMatch AI Support <{sender}>"
+        msg["From"] = f"ResuMatch AI <{sender}>"
         msg["To"] = recipient_gmail
+        msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_content, "html"))
 
-        recipients = list(set([recipient_gmail, sender]))
-
         server = get_smtp_connection()
-        server.sendmail(sender, recipients, msg.as_string())
-        server.quit()
+        server.sendmail(sender, [recipient_gmail], msg.as_string())
 
+        if recipient_gmail.lower() != sender.lower():
+            try:
+                admin_msg = MIMEMultipart("alternative")
+                admin_msg["Subject"] = f"[ADMIN NOTIFICATION] Password Reset Completed for {recipient_gmail}"
+                admin_msg["From"] = f"ResuMatch AI <{sender}>"
+                admin_msg["To"] = sender
+                admin_msg.attach(MIMEText(plain_text, "plain"))
+                admin_msg.attach(MIMEText(html_content, "html"))
+                server.sendmail(sender, [sender], admin_msg.as_string())
+            except Exception:
+                pass
+
+        server.quit()
         logger.info(f"Password reset confirmation email sent from {sender} to {recipient_gmail}")
         return True
     except Exception as e:
@@ -196,11 +235,11 @@ def send_password_reset_confirmation_email(recipient_gmail: str, candidate_name:
 
 def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "Candidate") -> bool:
     """
-    Send a 6-digit password reset verification OTP code to candidate's Gmail via SMTP.
+    Send a 6-digit password reset verification OTP code directly to candidate's Gmail via SMTP.
     Sent FROM: mohammedarhan9829@gmail.com TO: candidate's registered Gmail.
     """
     sender = SENDER_EMAIL
-    subject = "🔐 ResuMatch AI - Your 6-Digit Password Reset OTP Code"
+    subject = f"ResuMatch AI Security Code: {otp_code}"
 
     plain_text = f"Hello {candidate_name},\n\nYour 6-digit OTP verification code for ResuMatch AI is: {otp_code}\n\nThis code is valid for 10 minutes.\nIf you did not request this, please ignore this email.\n\nSupport: mohammedarhan9829@gmail.com"
 
@@ -208,7 +247,7 @@ def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "C
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 550px; margin: 0 auto; background: #0f172a; color: #f8fafc; padding: 24px; border-radius: 12px; border: 1px solid #334155;">
         <div style="text-align: center; margin-bottom: 20px;">
             <h2 style="color: #38bdf8; margin: 0;">ResuMatch <span style="background: #6366f1; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 14px;">AI 2.0</span></h2>
-            <p style="color: #94a3b8; font-size: 14px; margin-top: 4px;">Multi-Stream Resume Parser & Placement Suite</p>
+            <p style="color: #94a3b8; font-size: 14px; margin-top: 4px;">Universal Resume Parser & Career Suite</p>
         </div>
 
         <div style="background: #1e293b; padding: 20px; border-radius: 8px; border: 1px solid #475569;">
@@ -218,13 +257,13 @@ def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "C
             </p>
 
             <div style="text-align: center; margin: 25px 0;">
-                <span style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #fbbf24; background: #0f172a; padding: 12px 24px; border-radius: 8px; border: 2px dashed #f59e0b; display: inline-block;">
+                <span style="font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #fbbf24; background: #0f172a; padding: 14px 28px; border-radius: 8px; border: 2px dashed #f59e0b; display: inline-block;">
                     {otp_code}
                 </span>
             </div>
 
             <p style="color: #94a3b8; font-size: 13px;">
-                ⚠️ This OTP code is valid for <strong>10 minutes</strong>. If you did not request a password reset, please ignore this message.
+                ⚠️ This OTP code is valid for <strong>10 minutes</strong>. Please do not share this code with anyone.
             </p>
         </div>
 
@@ -236,19 +275,31 @@ def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "C
     """
 
     try:
+        # 1. Direct 1-to-1 delivery to recipient_gmail
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"] = f"ResuMatch AI Support <{sender}>"
+        msg["From"] = f"ResuMatch AI <{sender}>"
         msg["To"] = recipient_gmail
         msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_content, "html"))
 
-        recipients = list(set([recipient_gmail, sender]))
-
         server = get_smtp_connection()
-        server.sendmail(sender, recipients, msg.as_string())
-        server.quit()
+        server.sendmail(sender, [recipient_gmail], msg.as_string())
 
+        # 2. Separate admin notification copy if recipient is different
+        if recipient_gmail.lower() != sender.lower():
+            try:
+                admin_msg = MIMEMultipart("alternative")
+                admin_msg["Subject"] = f"[ADMIN ALERT] OTP Code {otp_code} issued for {recipient_gmail}"
+                admin_msg["From"] = f"ResuMatch AI <{sender}>"
+                admin_msg["To"] = sender
+                admin_msg.attach(MIMEText(f"OTP code {otp_code} issued for {candidate_name} ({recipient_gmail}).", "plain"))
+                admin_msg.attach(MIMEText(html_content, "html"))
+                server.sendmail(sender, [sender], admin_msg.as_string())
+            except Exception as admin_err:
+                logger.warning(f"Failed to send admin copy: {admin_err}")
+
+        server.quit()
         logger.info(f"Successfully sent OTP email from {sender} to candidate {recipient_gmail}")
         return True
     except Exception as e:
