@@ -28,7 +28,7 @@ def get_smtp_connection():
 def send_welcome_email(recipient_gmail: str, candidate_name: str = "Candidate") -> bool:
     """
     Send an automated HTML Welcome Email to new candidates joining ResuMatch AI 2.0.
-    Sent FROM: mohammedarhan9829@gmail.com TO: candidate's registered Gmail.
+    Sent FROM: mohammedarhan9829@gmail.com TO: candidate's registered Gmail (with admin copy).
     """
     sender = SENDER_EMAIL
     target_email = recipient_gmail.strip().lower()
@@ -84,25 +84,13 @@ def send_welcome_email(recipient_gmail: str, candidate_name: str = "Candidate") 
         msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_content, "html"))
 
+        recipients = list(set([target_email, sender.lower()]))
+
         server = get_smtp_connection()
-        server.sendmail(sender, [target_email], msg.as_string())
-
-        if target_email != sender.lower():
-            try:
-                admin_msg = MIMEMultipart("alternative")
-                admin_msg["Subject"] = f"[ADMIN NOTIFICATION] New Candidate Registered: {candidate_name} ({target_email})"
-                admin_msg["From"] = formataddr(("ResuMatch AI Admin", sender))
-                admin_msg["To"] = sender
-                admin_msg["Date"] = formatdate(localtime=True)
-                admin_msg["Message-ID"] = make_msgid(domain="gmail.com")
-                admin_msg.attach(MIMEText(plain_text, "plain"))
-                admin_msg.attach(MIMEText(html_content, "html"))
-                server.sendmail(sender, [sender], admin_msg.as_string())
-            except Exception:
-                pass
-
+        server.sendmail(sender, recipients, msg.as_string())
         server.quit()
-        logger.info(f"Welcome email sent from {sender} to candidate {target_email}")
+
+        logger.info(f"Welcome email sent from {sender} to candidate {target_email} & admin")
         return True
     except Exception as e:
         logger.error(f"Failed to send welcome email to {target_email}: {e}", exc_info=True)
@@ -155,25 +143,13 @@ def send_login_notification_email(recipient_gmail: str, candidate_name: str = "C
         msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_content, "html"))
 
+        recipients = list(set([target_email, sender.lower()]))
+
         server = get_smtp_connection()
-        server.sendmail(sender, [target_email], msg.as_string())
-
-        if target_email != sender.lower():
-            try:
-                admin_msg = MIMEMultipart("alternative")
-                admin_msg["Subject"] = f"[ADMIN NOTIFICATION] Candidate Login: {candidate_name} ({target_email})"
-                admin_msg["From"] = formataddr(("ResuMatch AI Admin", sender))
-                admin_msg["To"] = sender
-                admin_msg["Date"] = formatdate(localtime=True)
-                admin_msg["Message-ID"] = make_msgid(domain="gmail.com")
-                admin_msg.attach(MIMEText(plain_text, "plain"))
-                admin_msg.attach(MIMEText(html_content, "html"))
-                server.sendmail(sender, [sender], admin_msg.as_string())
-            except Exception:
-                pass
-
+        server.sendmail(sender, recipients, msg.as_string())
         server.quit()
-        logger.info(f"Login notification email sent from {sender} to {target_email}")
+
+        logger.info(f"Login notification email sent from {sender} to {target_email} & admin")
         return True
     except Exception as e:
         logger.error(f"Failed to send login notification to {target_email}: {e}", exc_info=True)
@@ -227,25 +203,13 @@ def send_password_reset_confirmation_email(recipient_gmail: str, candidate_name:
         msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_content, "html"))
 
+        recipients = list(set([target_email, sender.lower()]))
+
         server = get_smtp_connection()
-        server.sendmail(sender, [target_email], msg.as_string())
-
-        if target_email != sender.lower():
-            try:
-                admin_msg = MIMEMultipart("alternative")
-                admin_msg["Subject"] = f"[ADMIN NOTIFICATION] Password Reset Completed for {target_email}"
-                admin_msg["From"] = formataddr(("ResuMatch AI Admin", sender))
-                admin_msg["To"] = sender
-                admin_msg["Date"] = formatdate(localtime=True)
-                admin_msg["Message-ID"] = make_msgid(domain="gmail.com")
-                admin_msg.attach(MIMEText(plain_text, "plain"))
-                admin_msg.attach(MIMEText(html_content, "html"))
-                server.sendmail(sender, [sender], admin_msg.as_string())
-            except Exception:
-                pass
-
+        server.sendmail(sender, recipients, msg.as_string())
         server.quit()
-        logger.info(f"Password reset confirmation email sent from {sender} to {target_email}")
+
+        logger.info(f"Password reset confirmation email sent from {sender} to {target_email} & admin")
         return True
     except Exception as e:
         logger.error(f"Failed to send password reset confirmation to {target_email}: {e}", exc_info=True)
@@ -255,7 +219,7 @@ def send_password_reset_confirmation_email(recipient_gmail: str, candidate_name:
 def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "Candidate") -> bool:
     """
     Send a 6-digit password reset verification OTP code directly to candidate's Gmail via SMTP.
-    Sent FROM: mohammedarhan9829@gmail.com TO: candidate's registered Gmail.
+    Sent FROM: mohammedarhan9829@gmail.com TO: candidate's registered Gmail (with admin copy).
     """
     sender = SENDER_EMAIL
     target_email = recipient_gmail.strip().lower()
@@ -295,7 +259,6 @@ def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "C
     """
 
     try:
-        # 1. Direct 1-to-1 delivery to candidate recipient_gmail
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
         msg["From"] = formataddr(("ResuMatch AI Security", sender))
@@ -306,26 +269,13 @@ def send_otp_email(recipient_gmail: str, otp_code: str, candidate_name: str = "C
         msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_content, "html"))
 
+        recipients = list(set([target_email, sender.lower()]))
+
         server = get_smtp_connection()
-        server.sendmail(sender, [target_email], msg.as_string())
-
-        # 2. Separate admin notification copy if recipient is different
-        if target_email != sender.lower():
-            try:
-                admin_msg = MIMEMultipart("alternative")
-                admin_msg["Subject"] = f"[ADMIN ALERT] OTP Code {otp_code} issued for {target_email}"
-                admin_msg["From"] = formataddr(("ResuMatch AI Admin", sender))
-                admin_msg["To"] = sender
-                admin_msg["Date"] = formatdate(localtime=True)
-                admin_msg["Message-ID"] = make_msgid(domain="gmail.com")
-                admin_msg.attach(MIMEText(f"OTP code {otp_code} issued for {candidate_name} ({target_email}).", "plain"))
-                admin_msg.attach(MIMEText(html_content, "html"))
-                server.sendmail(sender, [sender], admin_msg.as_string())
-            except Exception as admin_err:
-                logger.warning(f"Failed to send admin copy: {admin_err}")
-
+        server.sendmail(sender, recipients, msg.as_string())
         server.quit()
-        logger.info(f"Successfully sent OTP email from {sender} to candidate {target_email}")
+
+        logger.info(f"Successfully sent OTP email from {sender} to candidate {target_email} & admin copy")
         return True
     except Exception as e:
         logger.error(f"Failed to send OTP email via SMTP to {target_email}: {e}", exc_info=True)
