@@ -227,12 +227,16 @@ class UserManager:
         """, (gmail_clean, otp_code, expires_at))
 
         conn.commit()
-        # Dispatch real email via SMTP directly to customer Gmail
+        conn.close()
+
+        # Dispatch real email via SMTP in non-daemon background thread (matches working welcome email flow)
+        import threading
         try:
             from backend.email_service import send_otp_email
-            email_sent = send_otp_email(gmail_clean, otp_code, cand_name)
+            threading.Thread(target=send_otp_email, args=(gmail_clean, otp_code, cand_name), daemon=False).start()
+            email_sent = True
         except Exception as err:
-            logger.error(f"Failed to send OTP email to {gmail_clean}: {err}")
+            logger.error(f"Failed to launch OTP email thread for {gmail_clean}: {err}")
             email_sent = False
 
         status_msg = f"🔑 6-Digit OTP Verification Code sent to '{gmail_clean}' from mohammedarhan9829@gmail.com! Please check your Gmail Inbox."
