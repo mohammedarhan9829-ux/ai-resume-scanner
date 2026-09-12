@@ -52,6 +52,14 @@ class ForgotPasswordSchema(BaseModel):
     gmail: str
     new_password: str
 
+class SendOtpSchema(BaseModel):
+    gmail: str
+
+class ResetPasswordOtpSchema(BaseModel):
+    gmail: str
+    otp_code: str
+    new_password: str
+
 class UpgradeSchema(BaseModel):
     plan: str = "pro"
     payment_ref: Optional[str] = "UPI_SUCCESS_150"
@@ -369,6 +377,24 @@ def forgot_username(data: ForgotUsernameSchema):
 def forgot_password(data: ForgotPasswordSchema):
     try:
         result = UserManager.reset_password_by_gmail(data.gmail, data.new_password)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/auth/send-otp")
+def send_otp(data: SendOtpSchema):
+    try:
+        result = UserManager.request_password_otp(data.gmail)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/auth/verify-otp-reset")
+def verify_otp_reset(data: ResetPasswordOtpSchema):
+    try:
+        result = UserManager.verify_otp_and_reset_password(data.gmail, data.otp_code, data.new_password)
         return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

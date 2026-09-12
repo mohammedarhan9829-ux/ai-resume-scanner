@@ -60,6 +60,15 @@ def init_db():
         )
     """)
 
+    # Password Reset OTPs Table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS password_otps (
+            gmail TEXT PRIMARY KEY,
+            otp_code TEXT NOT NULL,
+            expires_at TEXT NOT NULL
+        )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -155,6 +164,90 @@ class UserManager:
             "success": True, 
             "message": f"🎉 Password reset successful for '{row['name']}'! You can now log in with your new password.", 
             "name": row["name"]
+        }
+
+    @classmethod
+    def request_password_otp(cls, gmail: str) -> Dict[str, Any]:
+        """Generate and store a random 6-digit OTP code for password reset."""
+        import random
+        gmail_clean = gmail.strip().lower()
+        if not gmail_clean.endswith("@gmail.com"):
+            raise ValueError("Please enter a valid Gmail address ending with @gmail.com")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name FROM users WHERE email = ?", (gmail_clean,))
+        row = cursor.fetchone()
+        if not row:
+            conn.close()
+            raise ValueError("No registered account found with this Gmail address.")
+
+        otp_code = str(random.randint(100000, 999999))
+        expires_at = (datetime.now() + timedelta(minutes=10)).isoformat()
+
+        cursor.execute("""
+            INSERT INTO password_otps (gmail, otp_code, expires_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT(gmail) DO UPDATE SET otp_code=excluded.otp_code, expires_at=excluded.expires_at
+        """, (gmail_clean, otp_code, expires_at))
+
+        conn.commit()
+        conn.close()
+
+        return {
+            "success": True,
+            "message": f"🔑 6-Digit OTP Code sent to '{gmail_clean}'! (Valid for 10 min)",
+            "otp_code": otp_code,
+            "gmail": gmail_clean,
+            "name": row["name"]
+        }
+
+    @classmethod
+    def verify_otp_and_reset_password(cls, gmail: str, otp_code: str, new_password: str) -> Dict[str, Any]:
+        """Verify 6-digit OTP code and reset user password."""
+        gmail_clean = gmail.strip().lower()
+        otp_clean = otp_code.strip()
+
+        if not gmail_clean.endswith("@gmail.com"):
+            raise ValueError("Please enter a valid Gmail address ending with @gmail.com")
+
+        if not otp_clean or len(otp_clean) != 6:
+            raise ValueError("Please enter a valid 6-digit OTP verification code.")
+
+        if not new_password or len(new_password) < 6:
+            raise ValueError("New password must be at least 6 characters long.")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT otp_code, expires_at FROM password_otps WHERE gmail = ?", (gmail_clean,))
+        otp_row = cursor.fetchone()
+
+        if not otp_row or otp_row["otp_code"] != otp_clean:
+            conn.close()
+            raise ValueError("Incorrect 6-Digit OTP code. Please check and try again.")
+
+        if datetime.fromisoformat(otp_row["expires_at"]) < datetime.now():
+            conn.close()
+            raise ValueError("OTP verification code has expired (valid for 10 min). Please request a new OTP.")
+
+        cursor.execute("SELECT id, name FROM users WHERE email = ?", (gmail_clean,))
+        user_row = cursor.fetchone()
+        if not user_row:
+            conn.close()
+            raise ValueError("No registered account found.")
+
+        pwd_hash, salt = hash_password(new_password)
+        cursor.execute("UPDATE users SET password_hash = ?, salt = ? WHERE id = ?", (pwd_hash, salt, user_row["id"]))
+
+        cursor.execute("DELETE FROM password_otps WHERE gmail = ?", (gmail_clean,))
+        conn.commit()
+        conn.close()
+
+        return {
+            "success": True,
+            "message": f"🎉 Password successfully reset for '{user_row['name']}'! You can now log in with your new password.",
+            "name": user_row["name"]
         }
 
     @classmethod

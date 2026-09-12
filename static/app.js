@@ -73,6 +73,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const forgotPwdGmail = document.getElementById("forgotPwdGmail");
     const forgotNewPassword = document.getElementById("forgotNewPassword");
     const forgotPwdResult = document.getElementById("forgotPwdResult");
+    const btnSendOtp = document.getElementById("btnSendOtp");
+    const otpFieldsContainer = document.getElementById("otpFieldsContainer");
+    const forgotOtpCode = document.getElementById("forgotOtpCode");
+    const btnSubmitOtpReset = document.getElementById("btnSubmitOtpReset");
 
     const profileModal = document.getElementById("profileModal");
     const btnCloseProfileModal = document.getElementById("btnCloseProfileModal");
@@ -205,6 +209,8 @@ document.addEventListener("DOMContentLoaded", () => {
             tabRegister.classList.remove("active");
             hideAllAuthForms();
             if (forgotPwdResult) forgotPwdResult.classList.add("hidden");
+            if (otpFieldsContainer) otpFieldsContainer.classList.add("hidden");
+            if (btnSubmitOtpReset) btnSubmitOtpReset.classList.add("hidden");
             formForgotPassword.classList.remove("hidden");
         });
     }
@@ -297,29 +303,77 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    if (btnSendOtp) {
+        btnSendOtp.addEventListener("click", async () => {
+            const gmail = forgotPwdGmail.value.trim();
+            if (!gmail.toLowerCase().endsWith("@gmail.com")) {
+                alert("⚠️ Please enter a valid Gmail address ending with @gmail.com.");
+                return;
+            }
+            btnSendOtp.disabled = true;
+            btnSendOtp.textContent = "Sending...";
+            try {
+                const res = await fetch("/api/auth/send-otp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ gmail })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Failed to send OTP.");
+                
+                forgotPwdResult.innerHTML = `
+                    <strong><i class="fa-solid fa-paper-plane text-emerald"></i> ${data.message}</strong>
+                    <div style="margin-top:0.4rem; padding:0.4rem; background:rgba(245,158,11,0.2); border-radius:4px; color:#fef08a; font-size:0.82rem;">
+                        <strong>Verification OTP Code:</strong> <span style="font-weight:800; letter-spacing:2px; font-size:0.95rem;">${data.otp_code}</span>
+                    </div>
+                `;
+                forgotPwdResult.classList.remove("hidden");
+                otpFieldsContainer.classList.remove("hidden");
+                btnSubmitOtpReset.classList.remove("hidden");
+                if (forgotOtpCode) forgotOtpCode.value = data.otp_code;
+            } catch (err) {
+                forgotPwdResult.innerHTML = `<span style="color:var(--accent-rose);"><i class="fa-solid fa-circle-xmark"></i> ${err.message}</span>`;
+                forgotPwdResult.classList.remove("hidden");
+            } finally {
+                btnSendOtp.disabled = false;
+                btnSendOtp.textContent = "📩 Resend OTP";
+            }
+        });
+    }
+
     if (formForgotPassword) {
         formForgotPassword.addEventListener("submit", async (e) => {
             e.preventDefault();
             const gmail = forgotPwdGmail.value.trim();
+            const otp_code = forgotOtpCode.value.trim();
             const new_password = forgotNewPassword.value;
+
             if (!gmail.toLowerCase().endsWith("@gmail.com")) {
                 alert("⚠️ Please enter a valid Gmail address ending with @gmail.com.");
+                return;
+            }
+            if (!otp_code || otp_code.length !== 6) {
+                alert("⚠️ Please enter a valid 6-digit OTP verification code.");
                 return;
             }
             if (new_password.length < 6) {
                 alert("⚠️ Password must be at least 6 characters long.");
                 return;
             }
+
             try {
-                const res = await fetch("/api/auth/forgot-password", {
+                const res = await fetch("/api/auth/verify-otp-reset", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ gmail, new_password })
+                    body: JSON.stringify({ gmail, otp_code, new_password })
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.detail || "Password reset failed.");
+
                 forgotPwdResult.innerHTML = `<strong><i class="fa-solid fa-circle-check text-emerald"></i> ${data.message}</strong>`;
                 forgotPwdResult.classList.remove("hidden");
+                otpFieldsContainer.classList.add("hidden");
+                btnSubmitOtpReset.classList.add("hidden");
             } catch (err) {
                 forgotPwdResult.innerHTML = `<span style="color:var(--accent-rose);"><i class="fa-solid fa-circle-xmark"></i> ${err.message}</span>`;
                 forgotPwdResult.classList.remove("hidden");
